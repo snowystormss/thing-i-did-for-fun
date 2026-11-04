@@ -15,7 +15,9 @@ import {
   Search,
   Sparkles,
   ExternalLink,
-  Info
+  Info,
+  Loader2,
+  X
 } from 'lucide-react';
 
 export default function App() {
@@ -160,18 +162,25 @@ The output APK will be generated at \`app/build/outputs/apk/debug/app-debug.apk\
           <button
             onClick={handleDownloadZip}
             disabled={isExporting}
-            className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-white bg-purple-600 hover:bg-purple-500 rounded-lg shadow-md shadow-purple-900/30 transition-all whitespace-nowrap active:scale-95 disabled:opacity-50"
+            aria-label={isExporting ? 'Generating and downloading project ZIP' : exportComplete ? 'Project ZIP downloaded' : 'Download Android project ZIP'}
+            className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-white bg-purple-600 hover:bg-purple-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d121f] rounded-lg shadow-md shadow-purple-900/30 transition-all whitespace-nowrap active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
+            <span className="sr-only" aria-live="polite">
+              {isExporting ? 'Packaging project ZIP' : exportComplete ? 'Download complete' : ''}
+            </span>
             {isExporting ? (
-              <span>Packing ZIP...</span>
+              <>
+                <Loader2 className="w-3.5 h-3.5 text-white animate-spin" aria-hidden="true" />
+                <span>Packing ZIP...</span>
+              </>
             ) : exportComplete ? (
               <>
-                <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-white" aria-hidden="true" />
                 <span>Downloaded!</span>
               </>
             ) : (
               <>
-                <Download className="w-3.5 h-3.5" />
+                <Download className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Download Project ZIP</span>
               </>
             )}
@@ -240,14 +249,25 @@ The output APK will be generated at \`app/build/outputs/apk/debug/app-debug.apk\
               </div>
 
               <div className="relative mb-3">
-                <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" />
+                <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5 pointer-events-none" aria-hidden="true" />
                 <input
                   type="text"
+                  aria-label="Filter files by name or layer"
                   placeholder="Filter files by name or layer..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-8 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500 focus-visible:ring-1 focus-visible:ring-purple-500"
                 />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    aria-label="Clear file search filter"
+                    className="absolute right-2 top-2 p-0.5 text-slate-500 hover:text-slate-300 rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-400"
+                  >
+                    <X className="w-3.5 h-3.5" aria-hidden="true" />
+                  </button>
+                )}
               </div>
 
               <div className="flex-1 min-h-0 overflow-hidden">
