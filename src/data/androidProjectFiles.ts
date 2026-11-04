@@ -2,1456 +2,338 @@ export interface AndroidFile {
   path: string;
   name: string;
   category: 'gradle' | 'manifest' | 'kotlin_domain' | 'kotlin_data' | 'kotlin_service' | 'kotlin_ui' | 'res' | 'config';
-  language: 'kotlin' | 'xml' | 'groovy' | 'properties' | 'pro';
+  language: 'kotlin' | 'xml' | 'groovy' | 'properties' | 'pro' | 'toml' | 'sh' | 'bat' | 'config';
   description: string;
   content: string;
 }
 
 export const ANDROID_PROJECT_FILES: AndroidFile[] = [
   {
-    path: 'settings.gradle.kts',
-    name: 'settings.gradle.kts',
-    category: 'gradle',
-    language: 'kotlin',
-    description: 'Gradle plugin management and module root declaration',
-    content: `pluginManagement {
-    repositories {
-        google {
-            content {
-                includeGroupByRegex("com\\\\.android.*")
-                includeGroupByRegex("com\\\\.google.*")
-                includeGroupByRegex("androidx.*")
-            }
-        }
-        mavenCentral()
-        gradlePluginPortal()
-    }
-}
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
-
-rootProject.name = "LillyBot"
-include(":app")`
+    path: "settings.gradle.kts",
+    name: "settings.gradle.kts",
+    category: "gradle",
+    language: "kotlin",
+    description: "Gradle plugin management and module root declaration",
+    content: "pluginManagement {\n    repositories {\n        google {\n            content {\n                includeGroupByRegex(\"com\\\\.android.*\")\n                includeGroupByRegex(\"com\\\\.google.*\")\n                includeGroupByRegex(\"androidx.*\")\n            }\n        }\n        mavenCentral()\n        gradlePluginPortal()\n    }\n}\ndependencyResolutionManagement {\n    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)\n    repositories {\n        google()\n        mavenCentral()\n    }\n}\n\nrootProject.name = \"LillyBot\"\ninclude(\":app\")\n"
   },
   {
-    path: 'build.gradle.kts',
-    name: 'build.gradle.kts',
-    category: 'gradle',
-    language: 'kotlin',
-    description: 'Root build script configuring Android and Kotlin plugins',
-    content: `// Top-level build file where you can add configuration options common to all sub-projects/modules.
-plugins {
-    alias(libs.plugins.android.application) apply false
-    alias(libs.plugins.kotlin.android) apply false
-    alias(libs.plugins.kotlin.compose) apply false
-}`
+    path: "build.gradle.kts",
+    name: "build.gradle.kts",
+    category: "gradle",
+    language: "kotlin",
+    description: "Root build script configuring Android and Kotlin plugins",
+    content: "// Top-level build file where you can add configuration options common to all sub-projects/modules.\nplugins {\n    alias(libs.plugins.android.application) apply false\n    alias(libs.plugins.kotlin.android) apply false\n    alias(libs.plugins.kotlin.compose) apply false\n}\n"
   },
   {
-    path: 'gradle.properties',
-    name: 'gradle.properties',
-    category: 'config',
-    language: 'properties',
-    description: 'JVM args and AndroidX configuration flags',
-    content: `org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
-android.useAndroidX=true
-kotlin.code.style=official
-android.nonTransitiveRClass=true`
+    path: "gradle.properties",
+    name: "gradle.properties",
+    category: "gradle",
+    language: "properties",
+    description: "Project-wide Gradle memory and AndroidX properties",
+    content: "org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8\nandroid.useAndroidX=true\nkotlin.code.style=official\nandroid.nonTransitiveRClass=true\n"
   },
   {
-    path: 'gradle/wrapper/gradle-wrapper.properties',
-    name: 'gradle-wrapper.properties',
-    category: 'config',
-    language: 'properties',
-    description: 'Gradle Wrapper 8.10.2 distribution',
-    content: `distributionBase=GRADLE_USER_HOME
-distributionPath=wrapper/dists
-distributionUrl=https\\://services.gradle.org/distributions/gradle-8.10.2-bin.zip
-networkTimeout=10000
-validateDistributionUrl=true
-zipStoreBase=GRADLE_USER_HOME
-zipStorePath=wrapper/dists`
+    path: "gradle/wrapper/gradle-wrapper.properties",
+    name: "gradle-wrapper.properties",
+    category: "gradle",
+    language: "properties",
+    description: "Gradle wrapper configuration pointing to Gradle 8.10.2",
+    content: "distributionBase=GRADLE_USER_HOME\ndistributionPath=wrapper/dists\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-8.10.2-bin.zip\nnetworkTimeout=10000\nvalidateDistributionUrl=true\nzipStoreBase=GRADLE_USER_HOME\nzipStorePath=wrapper/dists\n"
   },
   {
-    path: 'gradle/libs.versions.toml',
-    name: 'libs.versions.toml',
-    category: 'gradle',
-    language: 'properties',
-    description: 'Version catalog for Compose BOM, OkHttp, Security Crypto, and WorkManager',
-    content: `[versions]
-agp = "8.7.2"
-kotlin = "2.0.21"
-coreKtx = "1.15.0"
-lifecycleRuntimeKtx = "2.8.7"
-activityCompose = "1.9.3"
-composeBom = "2024.10.01"
-okhttp = "4.12.0"
-coroutines = "1.9.0"
-securityCrypto = "1.1.0-alpha06"
-datastore = "1.1.1"
-workManager = "2.10.0"
-documentfile = "1.0.1"
-
-[libraries]
-androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
-androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
-androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
-androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
-androidx-ui = { group = "androidx.compose.ui", name = "ui" }
-androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
-androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
-androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
-androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
-okhttp-sse = { group = "com.squareup.okhttp3", name = "okhttp-sse", version.ref = "okhttp" }
-kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
-androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
-androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
-androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }
-androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile" }
-
-[plugins]
-android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }`
+    path: "gradle/libs.versions.toml",
+    name: "libs.versions.toml",
+    category: "gradle",
+    language: "toml",
+    description: "Version Catalog declaring all dependencies and plugin aliases",
+    content: "[versions]\nagp = \"8.7.2\"\nkotlin = \"2.0.21\"\ncoreKtx = \"1.15.0\"\nlifecycleRuntimeKtx = \"2.8.7\"\nactivityCompose = \"1.9.3\"\ncomposeBom = \"2024.10.01\"\nokhttp = \"4.12.0\"\ncoroutines = \"1.9.0\"\nsecurityCrypto = \"1.1.0-alpha06\"\ndatastore = \"1.1.1\"\nworkManager = \"2.10.0\"\ndocumentfile = \"1.0.1\"\n\n[libraries]\nandroidx-core-ktx = { group = \"androidx.core\", name = \"core-ktx\", version.ref = \"coreKtx\" }\nandroidx-lifecycle-runtime-ktx = { group = \"androidx.lifecycle\", name = \"lifecycle-runtime-ktx\", version.ref = \"lifecycleRuntimeKtx\" }\nandroidx-lifecycle-viewmodel-compose = { group = \"androidx.lifecycle\", name = \"lifecycle-viewmodel-compose\", version.ref = \"lifecycleRuntimeKtx\" }\nandroidx-activity-compose = { group = \"androidx.activity\", name = \"activity-compose\", version.ref = \"activityCompose\" }\nandroidx-compose-bom = { group = \"androidx.compose\", name = \"compose-bom\", version.ref = \"composeBom\" }\nandroidx-ui = { group = \"androidx.compose.ui\", name = \"ui\" }\nandroidx-ui-graphics = { group = \"androidx.compose.ui\", name = \"ui-graphics\" }\nandroidx-ui-tooling = { group = \"androidx.compose.ui\", name = \"ui-tooling\" }\nandroidx-ui-tooling-preview = { group = \"androidx.compose.ui\", name = \"ui-tooling-preview\" }\nandroidx-material3 = { group = \"androidx.compose.material3\", name = \"material3\" }\nandroidx-material-icons-extended = { group = \"androidx.compose.material\", name = \"material-icons-extended\" }\nokhttp = { group = \"com.squareup.okhttp3\", name = \"okhttp\", version.ref = \"okhttp\" }\nokhttp-sse = { group = \"com.squareup.okhttp3\", name = \"okhttp-sse\", version.ref = \"okhttp\" }\nkotlinx-coroutines-android = { group = \"org.jetbrains.kotlinx\", name = \"kotlinx-coroutines-android\", version.ref = \"coroutines\" }\nandroidx-security-crypto = { group = \"androidx.security\", name = \"security-crypto\", version.ref = \"securityCrypto\" }\nandroidx-datastore-preferences = { group = \"androidx.datastore\", name = \"datastore-preferences\", version.ref = \"datastore\" }\nandroidx-work-runtime-ktx = { group = \"androidx.work\", name = \"work-runtime-ktx\", version.ref = \"workManager\" }\nandroidx-documentfile = { group = \"androidx.documentfile\", name = \"documentfile\", version.ref = \"documentfile\" }\n\n[plugins]\nandroid-application = { id = \"com.android.application\", version.ref = \"agp\" }\nkotlin-android = { id = \"org.jetbrains.kotlin.android\", version.ref = \"kotlin\" }\nkotlin-compose = { id = \"org.jetbrains.kotlin.plugin.compose\", version.ref = \"kotlin\" }\n"
   },
   {
-    path: 'app/build.gradle.kts',
-    name: 'app/build.gradle.kts',
-    category: 'gradle',
-    language: 'kotlin',
-    description: 'Application module build script: minSdk 26, targetSdk 35, Java 17, Compose',
-    content: `plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
-}
-
-android {
-    namespace = "com.lilly.bot"
-    compileSdk = 35
-
-    defaultConfig {
-        applicationId = "com.lilly.bot"
-        minSdk = 26
-        targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-        debug {
-            isMinifyEnabled = false
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
-    buildFeatures {
-        compose = true
-    }
-}
-
-dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-    implementation(libs.androidx.material.icons.extended)
-
-    // Networking & SSE Streaming
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.sse)
-    implementation(libs.kotlinx.coroutines.android)
-
-    // Security & Encrypted Credential Storage
-    implementation(libs.androidx.security.crypto)
-
-    // Settings Persistence
-    implementation(libs.androidx.datastore.preferences)
-
-    // Background Scheduling for Sleep & Dream Cycles
-    implementation(libs.androidx.work.runtime.ktx)
-
-    // Storage Access Framework DocumentFile
-    implementation(libs.androidx.documentfile)
-
-    debugImplementation(libs.androidx.ui.tooling)
-}`
+    path: "gradlew",
+    name: "gradlew",
+    category: "gradle",
+    language: "sh",
+    description: "Unix shell script wrapper for Gradle",
+    content: "#!/bin/sh\n\n#\n# Copyright \u00a9 2015-2021 the original authors.\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this file except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#      https://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n#\n\n##############################################################################\n#\n#   Gradle start up script for POSIX generated by Gradle.\n#\n#   Important for running:\n#\n#   (1) You need a POSIX-compliant shell to run this script. If your /bin/sh is\n#       noncompliant, but you have some other compliant shell such as ksh or\n#       bash, then to run this script, type that shell name before the whole\n#       command line, like:\n#\n#           ksh Gradle\n#\n#       Busybox and similar reduced shells will NOT work, because this script\n#       requires all of these POSIX shell features:\n#         * functions;\n#         * expansions \u00ab$var\u00bb, \u00ab${var}\u00bb, \u00ab${var:-default}\u00bb, \u00ab${var+SET}\u00bb,\n#           \u00ab${var#prefix}\u00bb, \u00ab${var%suffix}\u00bb, and \u00ab$( cmd )\u00bb;\n#         * compound commands having a testable exit status, especially \u00abcase\u00bb;\n#         * various built-in commands including \u00abcommand\u00bb, \u00abset\u00bb, and \u00abulimit\u00bb.\n#\n#   Important for patching:\n#\n#   (2) This script targets any POSIX shell, so it avoids extensions provided\n#       by Bash, Ksh, etc; in particular arrays are avoided.\n#\n#       The \"traditional\" practice of packing multiple parameters into a\n#       space-separated string is a well documented source of bugs and security\n#       problems, so this is (mostly) avoided, by progressively accumulating\n#       options in \"$@\", and eventually passing that to Java.\n#\n#       Where the inherited environment variables (DEFAULT_JVM_OPTS, JAVA_OPTS,\n#       and GRADLE_OPTS) rely on word-splitting, this is performed explicitly;\n#       see the in-line comments for details.\n#\n#       There are tweaks for specific operating systems such as AIX, CygWin,\n#       Darwin, MinGW, and NonStop.\n#\n#   (3) This script is generated from the Groovy template\n#       https://github.com/gradle/gradle/blob/HEAD/platforms/jvm/plugins-application/src/main/resources/org/gradle/api/internal/plugins/unixStartScript.txt\n#       within the Gradle project.\n#\n#       You can find Gradle at https://github.com/gradle/gradle/.\n#\n##############################################################################\n\n# Attempt to set APP_HOME\n\n# Resolve links: $0 may be a link\napp_path=$0\n\n# Need this for daisy-chained symlinks.\nwhile\n    APP_HOME=${app_path%\"${app_path##*/}\"}  # leaves a trailing /; empty if no leading path\n    [ -h \"$app_path\" ]\ndo\n    ls=$( ls -ld \"$app_path\" )\n    link=${ls#*' -> '}\n    case $link in             #(\n      /*)   app_path=$link ;; #(\n      *)    app_path=$APP_HOME$link ;;\n    esac\ndone\n\n# This is normally unused\n# shellcheck disable=SC2034\nAPP_BASE_NAME=${0##*/}\n# Discard cd standard output in case $CDPATH is set (https://github.com/gradle/gradle/issues/25036)\nAPP_HOME=$( cd \"${APP_HOME:-./}\" > /dev/null && pwd -P ) || exit\n\n# Use the maximum available, or set MAX_FD != -1 to use that value.\nMAX_FD=maximum\n\nwarn () {\n    echo \"$*\"\n} >&2\n\ndie () {\n    echo\n    echo \"$*\"\n    echo\n    exit 1\n} >&2\n\n# OS specific support (must be 'true' or 'false').\ncygwin=false\nmsys=false\ndarwin=false\nnonstop=false\ncase \"$( uname )\" in                #(\n  CYGWIN* )         cygwin=true  ;; #(\n  Darwin* )         darwin=true  ;; #(\n  MSYS* | MINGW* )  msys=true    ;; #(\n  NONSTOP* )        nonstop=true ;;\nesac\n\nCLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar\n\n\n# Determine the Java command to use to start the JVM.\nif [ -n \"$JAVA_HOME\" ] ; then\n    if [ -x \"$JAVA_HOME/jre/sh/java\" ] ; then\n        # IBM's JDK on AIX uses strange locations for the executables\n        JAVACMD=$JAVA_HOME/jre/sh/java\n    else\n        JAVACMD=$JAVA_HOME/bin/java\n    fi\n    if [ ! -x \"$JAVACMD\" ] ; then\n        die \"ERROR: JAVA_HOME is set to an invalid directory: $JAVA_HOME\n\nPlease set the JAVA_HOME variable in your environment to match the\nlocation of your Java installation.\"\n    fi\nelse\n    JAVACMD=java\n    if ! command -v java >/dev/null 2>&1\n    then\n        die \"ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.\n\nPlease set the JAVA_HOME variable in your environment to match the\nlocation of your Java installation.\"\n    fi\nfi\n\n# Increase the maximum file descriptors if we can.\nif ! \"$cygwin\" && ! \"$darwin\" && ! \"$nonstop\" ; then\n    case $MAX_FD in #(\n      max*)\n        # In POSIX sh, ulimit -H is undefined. That's why the result is checked to see if it worked.\n        # shellcheck disable=SC2039,SC3045\n        MAX_FD=$( ulimit -H -n ) ||\n            warn \"Could not query maximum file descriptor limit\"\n    esac\n    case $MAX_FD in  #(\n      '' | soft) :;; #(\n      *)\n        # In POSIX sh, ulimit -n is undefined. That's why the result is checked to see if it worked.\n        # shellcheck disable=SC2039,SC3045\n        ulimit -n \"$MAX_FD\" ||\n            warn \"Could not set maximum file descriptor limit to $MAX_FD\"\n    esac\nfi\n\n# Collect all arguments for the java command, stacking in reverse order:\n#   * args from the command line\n#   * the main class name\n#   * -classpath\n#   * -D...appname settings\n#   * --module-path (only if needed)\n#   * DEFAULT_JVM_OPTS, JAVA_OPTS, and GRADLE_OPTS environment variables.\n\n# For Cygwin or MSYS, switch paths to Windows format before running java\nif \"$cygwin\" || \"$msys\" ; then\n    APP_HOME=$( cygpath --path --mixed \"$APP_HOME\" )\n    CLASSPATH=$( cygpath --path --mixed \"$CLASSPATH\" )\n\n    JAVACMD=$( cygpath --unix \"$JAVACMD\" )\n\n    # Now convert the arguments - kludge to limit ourselves to /bin/sh\n    for arg do\n        if\n            case $arg in                                #(\n              -*)   false ;;                            # don't mess with options #(\n              /?*)  t=${arg#/} t=/${t%%/*}              # looks like a POSIX filepath\n                    [ -e \"$t\" ] ;;                      #(\n              *)    false ;;\n            esac\n        then\n            arg=$( cygpath --path --ignore --mixed \"$arg\" )\n        fi\n        # Roll the args list around exactly as many times as the number of\n        # args, so each arg winds up back in the position where it started, but\n        # possibly modified.\n        #\n        # NB: a `for` loop captures its iteration list before it begins, so\n        # changing the positional parameters here affects neither the number of\n        # iterations, nor the values presented in `arg`.\n        shift                   # remove old arg\n        set -- \"$@\" \"$arg\"      # push replacement arg\n    done\nfi\n\n\n# Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.\nDEFAULT_JVM_OPTS='\"-Xmx64m\" \"-Xms64m\"'\n\n# Collect all arguments for the java command:\n#   * DEFAULT_JVM_OPTS, JAVA_OPTS, JAVA_OPTS, and optsEnvironmentVar are not allowed to contain shell fragments,\n#     and any embedded shellness will be escaped.\n#   * For example: A user cannot expect ${Hostname} to be expanded, as it is an environment variable and will be\n#     treated as '${Hostname}' itself on the command line.\n\nset -- \\\n        \"-Dorg.gradle.appname=$APP_BASE_NAME\" \\\n        -classpath \"$CLASSPATH\" \\\n        org.gradle.wrapper.GradleWrapperMain \\\n        \"$@\"\n\n# Stop when \"xargs\" is not available.\nif ! command -v xargs >/dev/null 2>&1\nthen\n    die \"xargs is not available\"\nfi\n\n# Use \"xargs\" to parse quoted args.\n#\n# With -n1 it outputs one arg per line, with the quotes and backslashes removed.\n#\n# In Bash we could simply go:\n#\n#   readarray ARGS < <( xargs -n1 <<<\"$var\" ) &&\n#   set -- \"${ARGS[@]}\" \"$@\"\n#\n# but POSIX shell has neither arrays nor command substitution, so instead we\n# post-process each arg (as a line of input to sed) to backslash-escape any\n# character that might be a shell metacharacter, then use eval to reverse\n# that process (while maintaining the separation between arguments), and wrap\n# the whole thing up as a single \"set\" statement.\n#\n# This will of course break if any of these variables contains a newline or\n# an unmatched quote.\n#\n\neval \"set -- $(\n        printf '%s\\n' \"$DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS\" |\n        xargs -n1 |\n        sed ' s~[^-[:alnum:]+,./:=@_]~\\\\&~g; ' |\n        tr '\\n' ' '\n    )\" '\"$@\"'\n\nexec \"$JAVACMD\" \"$@\"\n"
   },
   {
-    path: 'app/proguard-rules.pro',
-    name: 'proguard-rules.pro',
-    category: 'config',
-    language: 'pro',
-    description: 'Proguard keep rules for domain models and OkHttp reflection',
-    content: `-keep class com.lilly.bot.domain.model.** { *; }
--keepattributes *Annotation*
--dontwarn okhttp3.**
--dontwarn okio.**`
+    path: "gradlew.bat",
+    name: "gradlew.bat",
+    category: "gradle",
+    language: "bat",
+    description: "Windows batch script wrapper for Gradle",
+    content: "@rem\n@rem Copyright 2015 the original author or authors.\n@rem\n@rem Licensed under the Apache License, Version 2.0 (the \"License\");\n@rem you may not use this file except in compliance with the License.\n@rem You may obtain a copy of the License at\n@rem\n@rem      https://www.apache.org/licenses/LICENSE-2.0\n@rem\n@rem Unless required by applicable law or agreed to in writing, software\n@rem distributed under the License is distributed on an \"AS IS\" BASIS,\n@rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n@rem See the License for the specific language governing permissions and\n@rem limitations under the License.\n@rem\n\n@if \"%DEBUG%\"==\"\" @echo off\n@rem ##########################################################################\n@rem\n@rem  Gradle startup script for Windows\n@rem\n@rem ##########################################################################\n\n@rem Set local scope for the variables with windows NT shell\nif \"%OS%\"==\"Windows_NT\" setlocal\n\nset DIRNAME=%~dp0\nif \"%DIRNAME%\"==\"\" set DIRNAME=.\n@rem This is normally unused\nset APP_BASE_NAME=%~n0\nset APP_HOME=%DIRNAME%\n\n@rem Resolve any \".\" and \"..\" in APP_HOME to make it shorter.\nfor %%i in (\"%APP_HOME%\") do set APP_HOME=%%~fi\n\n@rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.\nset DEFAULT_JVM_OPTS=\"-Xmx64m\" \"-Xms64m\"\n\n@rem Find java.exe\nif defined JAVA_HOME goto findJavaFromJavaHome\n\nset JAVA_EXE=java.exe\n%JAVA_EXE% -version >NUL 2>&1\nif %ERRORLEVEL% equ 0 goto execute\n\necho. 1>&2\necho ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH. 1>&2\necho. 1>&2\necho Please set the JAVA_HOME variable in your environment to match the 1>&2\necho location of your Java installation. 1>&2\n\ngoto fail\n\n:findJavaFromJavaHome\nset JAVA_HOME=%JAVA_HOME:\"=%\nset JAVA_EXE=%JAVA_HOME%/bin/java.exe\n\nif exist \"%JAVA_EXE%\" goto execute\n\necho. 1>&2\necho ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME% 1>&2\necho. 1>&2\necho Please set the JAVA_HOME variable in your environment to match the 1>&2\necho location of your Java installation. 1>&2\n\ngoto fail\n\n:execute\n@rem Setup the command line\n\nset CLASSPATH=%APP_HOME%\\gradle\\wrapper\\gradle-wrapper.jar\n\n\n@rem Execute Gradle\n\"%JAVA_EXE%\" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% \"-Dorg.gradle.appname=%APP_BASE_NAME%\" -classpath \"%CLASSPATH%\" org.gradle.wrapper.GradleWrapperMain %*\n\n:end\n@rem End local scope for the variables with windows NT shell\nif %ERRORLEVEL% equ 0 goto mainEnd\n\n:fail\nrem Set variable GRADLE_EXIT_CONSOLE if you need the _script_ return code instead of\nrem the _cmd.exe /c_ return code!\nset EXIT_CODE=%ERRORLEVEL%\nif %EXIT_CODE% equ 0 set EXIT_CODE=1\nif not \"\"==\"%GRADLE_EXIT_CONSOLE%\" exit %EXIT_CODE%\nexit /b %EXIT_CODE%\n\n:mainEnd\nif \"%OS%\"==\"Windows_NT\" endlocal\n\n:omega\n"
   },
   {
-    path: 'app/src/main/AndroidManifest.xml',
-    name: 'AndroidManifest.xml',
-    category: 'manifest',
-    language: 'xml',
-    description: 'App manifest with Foreground Service, Internet, and WakeLock permissions',
-    content: `<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-
-    <application
-        android:allowBackup="true"
-        android:icon="@android:drawable/sym_def_app_icon"
-        android:label="@string/app_name"
-        android:roundIcon="@android:drawable/sym_def_app_icon"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.LillyBot"
-        android:usesCleartextTraffic="true">
-
-        <activity
-            android:name=".ui.MainActivity"
-            android:exported="true"
-            android:theme="@style/Theme.LillyBot"
-            android:windowSoftInputMode="adjustResize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <service
-            android:name=".service.LillyForegroundService"
-            android:exported="false"
-            android:foregroundServiceType="dataSync" />
-
-    </application>
-
-</manifest>`
+    path: "app/build.gradle.kts",
+    name: "build.gradle.kts",
+    category: "gradle",
+    language: "kotlin",
+    description: "App module build script configuring SDK 35, Jetpack Compose, and dependencies",
+    content: "plugins {\n    alias(libs.plugins.android.application)\n    alias(libs.plugins.kotlin.android)\n    alias(libs.plugins.kotlin.compose)\n}\n\nandroid {\n    namespace = \"com.lilly.bot\"\n    compileSdk = 35\n\n    defaultConfig {\n        applicationId = \"com.lilly.bot\"\n        minSdk = 26\n        targetSdk = 35\n        versionCode = 1\n        versionName = \"1.0.0\"\n\n        testInstrumentationRunner = \"androidx.test.runner.AndroidJUnitRunner\"\n    }\n\n    buildTypes {\n        release {\n            isMinifyEnabled = true\n            proguardFiles(\n                getDefaultProguardFile(\"proguard-android-optimize.txt\"),\n                \"proguard-rules.pro\"\n            )\n        }\n        debug {\n            isMinifyEnabled = false\n        }\n    }\n\n    compileOptions {\n        sourceCompatibility = JavaVersion.VERSION_17\n        targetCompatibility = JavaVersion.VERSION_17\n    }\n\n    kotlinOptions {\n        jvmTarget = \"17\"\n    }\n\n    buildFeatures {\n        compose = true\n    }\n}\n\ndependencies {\n    implementation(libs.androidx.core.ktx)\n    implementation(libs.androidx.lifecycle.runtime.ktx)\n    implementation(libs.androidx.lifecycle.viewmodel.compose)\n    implementation(libs.androidx.activity.compose)\n    implementation(platform(libs.androidx.compose.bom))\n    implementation(libs.androidx.ui)\n    implementation(libs.androidx.ui.graphics)\n    implementation(libs.androidx.ui.tooling.preview)\n    implementation(libs.androidx.material3)\n    implementation(libs.androidx.material.icons.extended)\n\n    // Networking & SSE Streaming\n    implementation(libs.okhttp)\n    implementation(libs.okhttp.sse)\n    implementation(libs.kotlinx.coroutines.android)\n\n    // Security & Encrypted Credential Storage\n    implementation(libs.androidx.security.crypto)\n\n    // Settings Persistence\n    implementation(libs.androidx.datastore.preferences)\n\n    // Background Scheduling for Sleep & Dream Cycles\n    implementation(libs.androidx.work.runtime.ktx)\n\n    // Storage Access Framework DocumentFile\n    implementation(libs.androidx.documentfile)\n\n    debugImplementation(libs.androidx.ui.tooling)\n}\n"
   },
   {
-    path: 'app/src/main/res/values/strings.xml',
-    name: 'strings.xml',
-    category: 'res',
-    language: 'xml',
-    description: 'Android string resources',
-    content: `<resources>
-    <string name="app_name">Lilly</string>
-    <string name="channel_name">Lilly Companion Service</string>
-    <string name="channel_description">Runs Lilly companion background tasks and dream sync</string>
-</resources>`
+    path: "app/proguard-rules.pro",
+    name: "proguard-rules.pro",
+    category: "config",
+    language: "pro",
+    description: "R8 and ProGuard shrinking rules for production builds",
+    content: "# Proguard rules for Lilly AI Companion\n-keep class com.lilly.bot.domain.model.** { *; }\n-keepattributes *Annotation*\n-dontwarn okhttp3.**\n-dontwarn okio.**\n"
   },
   {
-    path: 'app/src/main/res/values/colors.xml',
-    name: 'colors.xml',
-    category: 'res',
-    language: 'xml',
-    description: 'System color resources',
-    content: `<resources>
-    <color name="purple_primary">#8B5CF6</color>
-    <color name="purple_dark">#6D28D9</color>
-    <color name="slate_dark">#0B0F19</color>
-    <color name="slate_surface">#111827</color>
-</resources>`
+    path: "app/src/main/AndroidManifest.xml",
+    name: "AndroidManifest.xml",
+    category: "manifest",
+    language: "xml",
+    description: "App manifest declaring permissions and foreground service",
+    content: "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\">\n\n    <uses-permission android:name=\"android.permission.INTERNET\" />\n    <uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />\n    <uses-permission android:name=\"android.permission.FOREGROUND_SERVICE\" />\n    <uses-permission android:name=\"android.permission.FOREGROUND_SERVICE_DATA_SYNC\" />\n    <uses-permission android:name=\"android.permission.POST_NOTIFICATIONS\" />\n    <uses-permission android:name=\"android.permission.WAKE_LOCK\" />\n\n    <application\n        android:allowBackup=\"true\"\n        android:icon=\"@android:drawable/sym_def_app_icon\"\n        android:label=\"@string/app_name\"\n        android:roundIcon=\"@android:drawable/sym_def_app_icon\"\n        android:supportsRtl=\"true\"\n        android:theme=\"@style/Theme.LillyBot\"\n        android:usesCleartextTraffic=\"true\">\n\n        <activity\n            android:name=\".ui.MainActivity\"\n            android:exported=\"true\"\n            android:theme=\"@style/Theme.LillyBot\"\n            android:windowSoftInputMode=\"adjustResize\">\n            <intent-filter>\n                <action android:name=\"android.intent.action.MAIN\" />\n                <category android:name=\"android.intent.category.LAUNCHER\" />\n            </intent-filter>\n        </activity>\n\n        <service\n            android:name=\".service.LillyForegroundService\"\n            android:exported=\"false\"\n            android:foregroundServiceType=\"dataSync\" />\n\n    </application>\n\n</manifest>\n"
   },
   {
-    path: 'app/src/main/res/values/themes.xml',
-    name: 'themes.xml',
-    category: 'res',
-    language: 'xml',
-    description: 'Window and status bar themes',
-    content: `<resources>
-    <style name="Theme.LillyBot" parent="android:Theme.Material.NoActionBar">
-        <item name="android:statusBarColor">@color/slate_dark</item>
-        <item name="android:navigationBarColor">@color/slate_dark</item>
-    </style>
-</resources>`
+    path: "app/src/main/res/values/strings.xml",
+    name: "strings.xml",
+    category: "res",
+    language: "xml",
+    description: "String resources for app branding and notification channels",
+    content: "<resources>\n    <string name=\"app_name\">Lilly</string>\n    <string name=\"channel_name\">Lilly Companion Service</string>\n    <string name=\"channel_description\">Runs Lilly companion background tasks and dream sync</string>\n</resources>\n"
   },
   {
-    path: 'app/src/main/java/com/lilly/bot/domain/model/LillyState.kt',
-    name: 'LillyState.kt',
-    category: 'kotlin_domain',
-    language: 'kotlin',
-    description: 'Companion state model: AWAKE, SLEEP_INERTIA, DREAMING, DEEP_SLEEP',
-    content: `package com.lilly.bot.domain.model
-
-enum class CompanionMode {
-    AWAKE,
-    SLEEP_INERTIA,
-    DREAMING,
-    DEEP_SLEEP
-}
-
-data class LillyCompanionState(
-    val mode: CompanionMode = CompanionMode.AWAKE,
-    val lastActiveTimestamp: Long = System.currentTimeMillis(),
-    val sleepStartTime: Long? = null,
-    val inertiaWakingStartTime: Long? = null,
-    val currentTopic: String = "",
-    val isStreaming: Boolean = false,
-    val streamBuffer: String = "",
-    val activeToolCount: Int = 0
-) {
-    val isInert: Boolean
-        get() = mode == CompanionMode.SLEEP_INERTIA
-
-    val isSleeping: Boolean
-        get() = mode == CompanionMode.DREAMING || mode == CompanionMode.DEEP_SLEEP
-}`
+    path: "app/src/main/res/values/colors.xml",
+    name: "colors.xml",
+    category: "res",
+    language: "xml",
+    description: "Brand color constants and theme palettes",
+    content: "<resources>\n    <color name=\"purple_primary\">#8B5CF6</color>\n    <color name=\"purple_dark\">#6D28D9</color>\n    <color name=\"slate_dark\">#0B0F19</color>\n    <color name=\"slate_surface\">#111827</color>\n</resources>\n"
   },
   {
-    path: 'app/src/main/java/com/lilly/bot/domain/model/MemoryTier.kt',
-    name: 'MemoryTier.kt',
-    category: 'kotlin_domain',
-    language: 'kotlin',
-    description: '4-tier memory categories: permTerm, longTerm, medTerm, shortTerm, media',
-    content: `package com.lilly.bot.domain.model
-
-enum class MemoryTier(val dirName: String, val defaultRetentionDays: Int) {
-    PERM("permTerm", Int.MAX_VALUE),
-    LONG("longTerm", 365),
-    MED("medTerm", 120),
-    SHORT("shortTerm", 30),
-    MEDIA("media", 30);
-
-    companion object {
-        fun fromDirName(name: String): MemoryTier? {
-            return entries.find { it.dirName.equals(name, ignoreCase = true) }
-        }
-    }
-}
-
-data class MemoryItem(
-    val filename: String,
-    val tier: MemoryTier,
-    val content: String,
-    val lastModified: Long,
-    val sizeBytes: Long
-)`
+    path: "app/src/main/res/values/themes.xml",
+    name: "themes.xml",
+    category: "res",
+    language: "xml",
+    description: "Material 3 Dark/Light system theme styling",
+    content: "<resources>\n    <style name=\"Theme.LillyBot\" parent=\"android:Theme.Material.NoActionBar\">\n        <item name=\"android:statusBarColor\">@color/slate_dark</item>\n        <item name=\"android:navigationBarColor\">@color/slate_dark</item>\n    </style>\n</resources>\n"
   },
   {
-    path: 'app/src/main/java/com/lilly/bot/domain/model/Message.kt',
-    name: 'Message.kt',
-    category: 'kotlin_domain',
-    language: 'kotlin',
-    description: 'ChatMessage entity with multi-bubble list and estimated tokens',
-    content: `package com.lilly.bot.domain.model
-
-enum class Role {
-    USER,
-    ASSISTANT,
-    SYSTEM,
-    TOOL
-}
-
-data class ChatMessage(
-    val id: String = java.util.UUID.randomUUID().toString(),
-    val role: Role,
-    val content: String,
-    val bubbles: List<String> = emptyList(),
-    val timestamp: Long = System.currentTimeMillis(),
-    val estimatedTokens: Int = 0,
-    val isStreamPreview: Boolean = false,
-    val triggeredTools: List<ToolInvocation> = emptyList()
-)`
+    path: "app/src/main/java/com/lilly/bot/domain/model/LillyState.kt",
+    name: "LillyState.kt",
+    category: "kotlin_domain",
+    language: "kotlin",
+    description: "Core domain states (AWAKE, SLEEP_INERTIA, DREAMING, DEEP_SLEEP)",
+    content: "package com.lilly.bot.domain.model\n\nenum class CompanionMode {\n    AWAKE,\n    SLEEP_INERTIA,\n    DREAMING,\n    DEEP_SLEEP\n}\n\ndata class LillyCompanionState(\n    val mode: CompanionMode = CompanionMode.AWAKE,\n    val lastActiveTimestamp: Long = System.currentTimeMillis(),\n    val sleepStartTime: Long? = null,\n    val inertiaWakingStartTime: Long? = null,\n    val currentTopic: String = \"\",\n    val isStreaming: Boolean = false,\n    val streamBuffer: String = \"\",\n    val activeToolCount: Int = 0\n) {\n    val isInert: Boolean\n        get() = mode == CompanionMode.SLEEP_INERTIA\n\n    val isSleeping: Boolean\n        get() = mode == CompanionMode.DREAMING || mode == CompanionMode.DEEP_SLEEP\n}\n"
   },
   {
-    path: 'app/src/main/java/com/lilly/bot/domain/model/ToolInvocation.kt',
-    name: 'ToolInvocation.kt',
-    category: 'kotlin_domain',
-    language: 'kotlin',
-    description: 'Model for internal [RECALL] and [CLOUD] tool calls',
-    content: `package com.lilly.bot.domain.model
-
-enum class ToolType {
-    RECALL,
-    CLOUD
-}
-
-data class ToolInvocation(
-    val id: String = java.util.UUID.randomUUID().toString(),
-    val type: ToolType,
-    val rawMatch: String,
-    val query: String,
-    val result: String? = null,
-    val executionTimeMs: Long = 0,
-    val isCompleted: Boolean = false
-)`
+    path: "app/src/main/java/com/lilly/bot/domain/model/MemoryTier.kt",
+    name: "MemoryTier.kt",
+    category: "kotlin_domain",
+    language: "kotlin",
+    description: "Enumeration of the 5 memory directory tiers with day retentions",
+    content: "package com.lilly.bot.domain.model\n\nenum class MemoryTier(val dirName: String, val defaultRetentionDays: Int) {\n    PERM(\"permTerm\", Int.MAX_VALUE),\n    LONG(\"longTerm\", 365),\n    MED(\"medTerm\", 120),\n    SHORT(\"shortTerm\", 30),\n    MEDIA(\"media\", 30);\n\n    companion object {\n        fun fromDirName(name: String): MemoryTier? {\n            return entries.find { it.dirName.equals(name, ignoreCase = true) }\n        }\n    }\n}\n\ndata class MemoryItem(\n    val filename: String,\n    val tier: MemoryTier,\n    val content: String,\n    val lastModified: Long,\n    val sizeBytes: Long\n)\n"
   },
   {
-    path: 'app/src/main/java/com/lilly/bot/domain/brain/SanitizationUtils.kt',
-    name: 'SanitizationUtils.kt',
-    category: 'kotlin_domain',
-    language: 'kotlin',
-    description: 'Character decoding (UTF-8/CP1252), smart character replacement, safeSlug',
-    content: `package com.lilly.bot.domain.brain
-
-import java.nio.ByteBuffer
-import java.nio.charset.CharacterCodingException
-import java.nio.charset.Charset
-import java.nio.charset.CodingErrorAction
-import java.nio.charset.StandardCharsets
-
-object SanitizationUtils {
-
-    /**
-     * Attempts to decode rawBytes as strict UTF-8 (reporting coding errors).
-     * On CharacterCodingException, decodes using Windows-1252.
-     * Strips any leading Unicode Byte Order Mark (\\uFEFF).
-     */
-    fun robustDecode(rawBytes: ByteArray): String {
-        return try {
-            val decoder = StandardCharsets.UTF_8.newDecoder()
-                .onMalformedInput(CodingErrorAction.REPORT)
-                .onUnmappableCharacter(CodingErrorAction.REPORT)
-            val charBuffer = decoder.decode(ByteBuffer.wrap(rawBytes))
-            charBuffer.toString().removePrefix("\\uFEFF")
-        } catch (e: CharacterCodingException) {
-            val winCharset = Charset.forName("windows-1252")
-            winCharset.decode(ByteBuffer.wrap(rawBytes)).toString().removePrefix("\\uFEFF")
-        }
-    }
-
-    /**
-     * Replaces smart typography and non-standard spacing with standard ASCII equivalents.
-     */
-    fun sanitizeSmartChars(text: String): String {
-        return text
-            .replace('\\u2018', '\\'')
-            .replace('\\u2019', '\\'')
-            .replace('\\u201A', ',')
-            .replace('\\u201B', '\\'')
-            .replace('\\u201C', '"')
-            .replace('\\u201D', '"')
-            .replace('\\u201E', '"')
-            .replace('\\u2013', '-')
-            .replace("\\u2014", "--")
-            .replace("\\u2026", "...")
-            .replace('\\u00A0', ' ')
-            .replace("\\u00AD", "")
-            .replace('\\u2022', '*')
-            .replace('\\u2212', '-')
-            .replace('\\u00B4', '\\'')
-    }
-
-    /**
-     * Converts arbitrary string into a filesystem-safe lowercase slug.
-     */
-    fun safeSlug(text: String): String {
-        return text.lowercase()
-            .replace(Regex("[^a-z0-9]+"), "_")
-            .trim('_')
-            .ifEmpty { "note" }
-    }
-}`
+    path: "app/src/main/java/com/lilly/bot/domain/model/Message.kt",
+    name: "Message.kt",
+    category: "kotlin_domain",
+    language: "kotlin",
+    description: "Chat message models, roles, and timestamp metadata",
+    content: "package com.lilly.bot.domain.model\n\nenum class Role {\n    USER,\n    ASSISTANT,\n    SYSTEM,\n    TOOL\n}\n\ndata class ChatMessage(\n    val id: String = java.util.UUID.randomUUID().toString(),\n    val role: Role,\n    val content: String,\n    val bubbles: List<String> = emptyList(),\n    val timestamp: Long = System.currentTimeMillis(),\n    val estimatedTokens: Int = 0,\n    val isStreamPreview: Boolean = false,\n    val triggeredTools: List<ToolInvocation> = emptyList()\n)\n"
   },
   {
-    path: 'app/src/main/java/com/lilly/bot/domain/brain/TextParsers.kt',
-    name: 'TextParsers.kt',
-    category: 'kotlin_domain',
-    language: 'kotlin',
-    description: 'Regex token cleaners, section parser, stream visible truncator, and bubble splitter',
-    content: `package com.lilly.bot.domain.brain
-
-import com.lilly.bot.domain.model.ToolInvocation
-import com.lilly.bot.domain.model.ToolType
-
-object TextParsers {
-
-    private val THINK_TAG_REGEX = Regex(
-        "<(thought|think)>.*?</\\\\1>",
-        setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE)
-    )
-
-    private val CHANNEL_THOUGHT_REGEX = Regex(
-        "<\\\\|channel\\\\|>thought.*?<\\\\|channel\\\\|>",
-        RegexOption.DOT_MATCHES_ALL
-    )
-
-    private val END_OF_THOUGHT_REGEX = Regex(
-        "<\\\\|thought\\\\|>.*?<\\\\|end_of_thought\\\\|>",
-        RegexOption.DOT_MATCHES_ALL
-    )
-
-    private val ROLE_PREFIX_REGEX = Regex(
-        "^(assistant|user):\\\\s*",
-        RegexOption.IGNORE_CASE
-    )
-
-    private val BREAK_TOKEN_REGEX = Regex(
-        "\\\\[break\\\\]",
-        RegexOption.IGNORE_CASE
-    )
-
-    private val SECTION_HEADER_REGEX = Regex(
-        "^\\\\[(SHORT|MED|LONG|PERM|TITLE)\\\\]",
-        RegexOption.MULTILINE
-    )
-
-    private val RECALL_TOOL_REGEX = Regex(
-        "\\\\[RECALL:\\\\s*(.+?)\\\\]",
-        RegexOption.IGNORE_CASE
-    )
-
-    private val CLOUD_TOOL_REGEX = Regex(
-        "\\\\[CLOUD:\\\\s*(.+?)\\\\]",
-        RegexOption.IGNORE_CASE
-    )
-
-    fun stripModelThinking(text: String): String {
-        val noTags = THINK_TAG_REGEX.replace(text, "")
-        return noTags.replace(Regex("\\\\n{3,}"), "\\n\\n").trim()
-    }
-
-    fun stripThinkingPreamble(text: String): String {
-        val cleaned = stripModelThinking(text)
-        val match = SECTION_HEADER_REGEX.find(cleaned)
-        return if (match != null) {
-            cleaned.substring(match.range.first)
-        } else {
-            cleaned
-        }
-    }
-
-    fun parseSection(text: String, sectionName: String): String {
-        val pattern = Regex(
-            "^\\\\[\${Regex.escape(sectionName)}\\\\](.*?)(?=^\\\\[[A-Z_]+\\\\]|\\\\z)",
-            setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.MULTILINE)
-        )
-        val match = pattern.find(text)
-        return match?.groupValues?.getOrNull(1)?.trim() ?: ""
-    }
-
-    fun parseSectionTitle(text: String, sectionName: String): String {
-        val sectionBody = parseSection(text, sectionName)
-        if (sectionBody.isBlank()) return ""
-        val titleMatch = Regex("\\\\[TITLE:\\\\s*(.+?)\\\\]", RegexOption.IGNORE_CASE).find(sectionBody)
-        val rawTitle = titleMatch?.groupValues?.getOrNull(1)?.trim()?.take(60) ?: ""
-        return if (rawTitle.isNotEmpty()) SanitizationUtils.safeSlug(rawTitle) else ""
-    }
-
-    fun stripReplyControlTokens(reply: String): String {
-        var text = THINK_TAG_REGEX.replace(reply, "")
-        text = CHANNEL_THOUGHT_REGEX.replace(text, "")
-        text = END_OF_THOUGHT_REGEX.replace(text, "")
-        text = ROLE_PREFIX_REGEX.replace(text, "")
-        text = BREAK_TOKEN_REGEX.replace(text, "\\n\\n")
-        text = text.replace(Regex("\\\\n{3,}"), "\\n\\n")
-        return text.trim()
-    }
-
-    fun streamVisibleText(rawReply: String): String {
-        var visible = stripReplyControlTokens(rawReply)
-        val lastOpen = visible.lastIndexOf('[')
-        val lastClose = visible.lastIndexOf(']')
-        if (lastOpen > lastClose) {
-            visible = visible.substring(0, lastOpen)
-        }
-        return visible.trimEnd()
-    }
-
-    fun extractToolInvocations(text: String): List<ToolInvocation> {
-        val invocations = mutableListOf<ToolInvocation>()
-        RECALL_TOOL_REGEX.findAll(text).forEach { match ->
-            invocations.add(
-                ToolInvocation(
-                    type = ToolType.RECALL,
-                    rawMatch = match.value,
-                    query = match.groupValues[1].trim()
-                )
-            )
-        }
-        CLOUD_TOOL_REGEX.findAll(text).forEach { match ->
-            invocations.add(
-                ToolInvocation(
-                    type = ToolType.CLOUD,
-                    rawMatch = match.value,
-                    query = match.groupValues[1].trim()
-                )
-            )
-        }
-        return invocations
-    }
-
-    fun splitBubbles(
-        rawReply: String,
-        maxBubbles: Int = 3,
-        maxBubbleChunkChars: Int = 900
-    ): List<String> {
-        val cleaned = stripReplyControlTokens(rawReply)
-        if (cleaned.isBlank()) return emptyList()
-
-        val parts = cleaned.split(Regex("\\\\n\\\\n+")).map { it.trim() }.filter { it.isNotEmpty() }
-        val bubbles = mutableListOf<String>()
-
-        var currentBubble = StringBuilder()
-        for (part in parts) {
-            if (currentBubble.isEmpty()) {
-                currentBubble.append(part)
-            } else if (currentBubble.length + part.length + 2 <= maxBubbleChunkChars) {
-                currentBubble.append("\\n\\n").append(part)
-            } else {
-                bubbles.add(currentBubble.toString().trim())
-                currentBubble = StringBuilder(part)
-                if (bubbles.size >= maxBubbles - 1) {
-                    break
-                }
-            }
-        }
-        if (currentBubble.isNotEmpty()) {
-            bubbles.add(currentBubble.toString().trim())
-        }
-
-        return bubbles.take(maxBubbles)
-    }
-}`
+    path: "app/src/main/java/com/lilly/bot/domain/model/ToolInvocation.kt",
+    name: "ToolInvocation.kt",
+    category: "kotlin_domain",
+    language: "kotlin",
+    description: "Structured representations for RECALL, CLOUD, and break tools",
+    content: "package com.lilly.bot.domain.model\n\nenum class ToolType {\n    RECALL,\n    CLOUD\n}\n\ndata class ToolInvocation(\n    val id: String = java.util.UUID.randomUUID().toString(),\n    val type: ToolType,\n    val rawMatch: String,\n    val query: String,\n    val result: String? = null,\n    val executionTimeMs: Long = 0,\n    val isCompleted: Boolean = false\n)\n"
   },
   {
-    path: 'app/src/main/java/com/lilly/bot/domain/brain/TokenBudgeter.kt',
-    name: 'TokenBudgeter.kt',
-    category: 'kotlin_domain',
-    language: 'kotlin',
-    description: 'Calculates usable context, reserves response tokens, trims history backwards',
-    content: `package com.lilly.bot.domain.brain
-
-import com.lilly.bot.domain.model.ChatMessage
-import kotlin.math.max
-
-class TokenBudgeter(
-    var modelContextTokens: Int = 8192,
-    var contextUtilizationRatio: Float = 0.95f,
-    var responseTokenReserve: Int = 2048,
-    var conversationWindowMessages: Int = 0
-) {
-
-    fun estimateTokens(text: String): Int {
-        if (text.isEmpty()) return 0
-        val words = text.split(Regex("\\\\s+")).size
-        val chars = text.length
-        return max(words, (chars / 3.8).toInt())
-    }
-
-    fun calculateAvailableHistoryBudget(systemPromptTokens: Int): Int {
-        val totalUsable = (modelContextTokens * contextUtilizationRatio).toInt()
-        val budget = totalUsable - responseTokenReserve - systemPromptTokens
-        return max(256, budget)
-    }
-
-    fun budgetHistory(
-        messages: List<ChatMessage>,
-        systemPromptTokens: Int
-    ): List<ChatMessage> {
-        if (messages.isEmpty()) return emptyList()
-
-        val candidateList = if (conversationWindowMessages > 0) {
-            messages.takeLast(conversationWindowMessages)
-        } else {
-            messages
-        }
-
-        val availableBudget = calculateAvailableHistoryBudget(systemPromptTokens)
-        var usedTokens = 0
-        val budgeted = mutableListOf<ChatMessage>()
-
-        for (i in candidateList.indices.reversed()) {
-            val msg = candidateList[i]
-            val cost = if (msg.estimatedTokens > 0) msg.estimatedTokens else estimateTokens(msg.content)
-            if (usedTokens + cost > availableBudget && budgeted.isNotEmpty()) {
-                break
-            }
-            usedTokens += cost
-            budgeted.add(msg)
-        }
-
-        return budgeted.reversed()
-    }
-}`
+    path: "app/src/main/java/com/lilly/bot/domain/brain/SanitizationUtils.kt",
+    name: "SanitizationUtils.kt",
+    category: "kotlin_domain",
+    language: "kotlin",
+    description: "Smart character normalizer, UTF-8/CP-1252 fixes, and file slug generator",
+    content: "package com.lilly.bot.domain.brain\n\nimport java.nio.ByteBuffer\nimport java.nio.charset.CharacterCodingException\nimport java.nio.charset.Charset\nimport java.nio.charset.CodingErrorAction\nimport java.nio.charset.StandardCharsets\n\nobject SanitizationUtils {\n\n    /**\n     * Attempts to decode rawBytes as strict UTF-8 (reporting coding errors).\n     * On CharacterCodingException, decodes using Windows-1252.\n     * Strips any leading Unicode Byte Order Mark (\\uFEFF).\n     */\n    fun robustDecode(rawBytes: ByteArray): String {\n        return try {\n            val decoder = StandardCharsets.UTF_8.newDecoder()\n                .onMalformedInput(CodingErrorAction.REPORT)\n                .onUnmappableCharacter(CodingErrorAction.REPORT)\n            val charBuffer = decoder.decode(ByteBuffer.wrap(rawBytes))\n            charBuffer.toString().removePrefix(\"\\uFEFF\")\n        } catch (e: CharacterCodingException) {\n            val winCharset = Charset.forName(\"windows-1252\")\n            winCharset.decode(ByteBuffer.wrap(rawBytes)).toString().removePrefix(\"\\uFEFF\")\n        }\n    }\n\n    /**\n     * Replaces smart typography and non-standard spacing with standard ASCII equivalents.\n     */\n    fun sanitizeSmartChars(text: String): String {\n        return text\n            .replace('\\u2018', '\\'')\n            .replace('\\u2019', '\\'')\n            .replace('\\u201A', ',')\n            .replace('\\u201B', '\\'')\n            .replace('\\u201C', '\"')\n            .replace('\\u201D', '\"')\n            .replace('\\u201E', '\"')\n            .replace('\\u2013', '-')\n            .replace(\"\\u2014\", \"--\")\n            .replace(\"\\u2026\", \"...\")\n            .replace('\\u00A0', ' ')\n            .replace(\"\\u00AD\", \"\")\n            .replace('\\u2022', '*')\n            .replace('\\u2212', '-')\n            .replace('\\u00B4', '\\'')\n    }\n\n    /**\n     * Converts arbitrary string into a filesystem-safe lowercase slug.\n     */\n    fun safeSlug(text: String): String {\n        return text.lowercase()\n            .replace(Regex(\"[^a-z0-9]+\"), \"_\")\n            .trim('_')\n            .ifEmpty { \"note\" }\n    }\n}\n"
   },
   {
-    path: 'app/src/main/java/com/lilly/bot/domain/brain/SleepStateMachine.kt',
-    name: 'SleepStateMachine.kt',
-    category: 'kotlin_domain',
-    language: 'kotlin',
-    description: 'Sleep, dream, deep sleep transitions, and sleep inertia interruption handling',
-    content: `package com.lilly.bot.domain.brain
-
-import com.lilly.bot.domain.model.CompanionMode
-import com.lilly.bot.domain.model.LillyCompanionState
-
-class SleepStateMachine(
-    var idleSortAfterMinutes: Int = 5,
-    var dreamShutdownMinutes: Int = 30,
-    var contextTimeoutSeconds: Int = 1800,
-    var sleepInertiaDurationSeconds: Int = 45
-) {
-    private var state = LillyCompanionState(mode = CompanionMode.AWAKE)
-
-    fun getCurrentState(): LillyCompanionState = state
-
-    fun onUserMessageReceived(now: Long = System.currentTimeMillis()): WakeEventResult {
-        val previousMode = state.mode
-        val elapsedSinceActive = (now - state.lastActiveTimestamp) / 1000
-
-        val contextTimedOut = elapsedSinceActive >= contextTimeoutSeconds
-
-        val result = when (previousMode) {
-            CompanionMode.AWAKE -> {
-                WakeEventResult(
-                    shouldResetContext = contextTimedOut,
-                    wasInterrupted = false,
-                    wakingPromptPrefix = ""
-                )
-            }
-            CompanionMode.SLEEP_INERTIA -> {
-                val inertiaElapsed = (now - (state.inertiaWakingStartTime ?: now)) / 1000
-                if (inertiaElapsed >= sleepInertiaDurationSeconds) {
-                    state = state.copy(mode = CompanionMode.AWAKE, inertiaWakingStartTime = null)
-                }
-                WakeEventResult(
-                    shouldResetContext = false,
-                    wasInterrupted = true,
-                    wakingPromptPrefix = "[System note: Lilly is waking up and experiencing slight sleep inertia. Respond naturally as someone rubbing sleep from their eyes.]"
-                )
-            }
-            CompanionMode.DREAMING, CompanionMode.DEEP_SLEEP -> {
-                state = state.copy(
-                    mode = CompanionMode.SLEEP_INERTIA,
-                    inertiaWakingStartTime = now,
-                    sleepStartTime = null
-                )
-                WakeEventResult(
-                    shouldResetContext = contextTimedOut,
-                    wasInterrupted = true,
-                    wakingPromptPrefix = if (previousMode == CompanionMode.DREAMING) {
-                        "[System note: Lilly was mid-dream/reflecting when the user suddenly spoke. Wake up with gentle surprise or slight disorientation.]"
-                    } else {
-                        "[System note: Lilly was in deep sleep and is waking up. Acknowledge waking up naturally.]"
-                    }
-                )
-            }
-        }
-
-        state = state.copy(lastActiveTimestamp = now)
-        return result
-    }
-
-    fun evaluateIdleTick(now: Long = System.currentTimeMillis()): TransitionEvent? {
-        val idleSeconds = (now - state.lastActiveTimestamp) / 1000
-
-        when (state.mode) {
-            CompanionMode.AWAKE -> {
-                if (idleSeconds >= idleSortAfterMinutes * 60) {
-                    state = state.copy(
-                        mode = CompanionMode.DREAMING,
-                        sleepStartTime = now
-                    )
-                    return TransitionEvent.ENTERED_DREAMING
-                }
-            }
-            CompanionMode.SLEEP_INERTIA -> {
-                val inertiaElapsed = (now - (state.inertiaWakingStartTime ?: now)) / 1000
-                if (inertiaElapsed >= sleepInertiaDurationSeconds) {
-                    state = state.copy(
-                        mode = CompanionMode.AWAKE,
-                        inertiaWakingStartTime = null
-                    )
-                    return TransitionEvent.WOKE_FULL_ALERT
-                }
-            }
-            CompanionMode.DREAMING -> {
-                val dreamSeconds = (now - (state.sleepStartTime ?: now)) / 1000
-                if (dreamSeconds >= dreamShutdownMinutes * 60) {
-                    state = state.copy(mode = CompanionMode.DEEP_SLEEP)
-                    return TransitionEvent.ENTERED_DEEP_SLEEP
-                }
-            }
-            CompanionMode.DEEP_SLEEP -> {}
-        }
-        return null
-    }
-
-    data class WakeEventResult(
-        val shouldResetContext: Boolean,
-        val wasInterrupted: Boolean,
-        val wakingPromptPrefix: String
-    )
-
-    enum class TransitionEvent {
-        ENTERED_DREAMING,
-        ENTERED_DEEP_SLEEP,
-        WOKE_FULL_ALERT
-    }
-}`
+    path: "app/src/main/java/com/lilly/bot/domain/brain/TextParsers.kt",
+    name: "TextParsers.kt",
+    category: "kotlin_domain",
+    language: "kotlin",
+    description: "Thinking tag stripper, stream visible text filter, and multi-bubble splitter",
+    content: "package com.lilly.bot.domain.brain\n\nimport com.lilly.bot.domain.model.ToolInvocation\nimport com.lilly.bot.domain.model.ToolType\n\nobject TextParsers {\n\n    private val THINK_TAG_REGEX = Regex(\n        \"<(thought|think)>.*?</\\\\1>\",\n        setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE)\n    )\n\n    private val CHANNEL_THOUGHT_REGEX = Regex(\n        \"<\\\\|channel\\\\|>thought.*?<\\\\|channel\\\\|>\",\n        RegexOption.DOT_MATCHES_ALL\n    )\n\n    private val END_OF_THOUGHT_REGEX = Regex(\n        \"<\\\\|thought\\\\|>.*?<\\\\|end_of_thought\\\\|>\",\n        RegexOption.DOT_MATCHES_ALL\n    )\n\n    private val ROLE_PREFIX_REGEX = Regex(\n        \"^(assistant|user):\\\\s*\",\n        RegexOption.IGNORE_CASE\n    )\n\n    private val BREAK_TOKEN_REGEX = Regex(\n        \"\\\\[break\\\\]\",\n        RegexOption.IGNORE_CASE\n    )\n\n    private val SECTION_HEADER_REGEX = Regex(\n        \"^\\\\[(SHORT|MED|LONG|PERM|TITLE)\\\\]\",\n        RegexOption.MULTILINE\n    )\n\n    private val RECALL_TOOL_REGEX = Regex(\n        \"\\\\[RECALL:\\\\s*(.+?)\\\\]\",\n        RegexOption.IGNORE_CASE\n    )\n\n    private val CLOUD_TOOL_REGEX = Regex(\n        \"\\\\[CLOUD:\\\\s*(.+?)\\\\]\",\n        RegexOption.IGNORE_CASE\n    )\n\n    /**\n     * Removes all <thought>...</thought> and <think>...</think> spans\n     * and collapses 3+ newlines to double newline.\n     */\n    fun stripModelThinking(text: String): String {\n        val noTags = THINK_TAG_REGEX.replace(text, \"\")\n        return noTags.replace(Regex(\"\\\\n{3,}\"), \"\\n\\n\").trim()\n    }\n\n    /**\n     * Strips model thinking, then searches for the first [SHORT], [MED], [LONG],\n     * [PERM], or [TITLE] block. If found, returns text starting from that header.\n     */\n    fun stripThinkingPreamble(text: String): String {\n        val cleaned = stripModelThinking(text)\n        val match = SECTION_HEADER_REGEX.find(cleaned)\n        return if (match != null) {\n            cleaned.substring(match.range.first)\n        } else {\n            cleaned\n        }\n    }\n\n    /**\n     * Matches a bracketed section e.g. [SHORT] body up to next section or EOF.\n     */\n    fun parseSection(text: String, sectionName: String): String {\n        val pattern = Regex(\n            \"^\\\\[${Regex.escape(sectionName)}\\\\](.*?)(?=^\\\\[[A-Z_]+\\\\]|\\\\z)\",\n            setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.MULTILINE)\n        )\n        val match = pattern.find(text)\n        return match?.groupValues?.getOrNull(1)?.trim() ?: \"\"\n    }\n\n    /**\n     * Extracts [TITLE: ...] within a section body, takes up to 60 chars and returns safeSlug.\n     */\n    fun parseSectionTitle(text: String, sectionName: String): String {\n        val sectionBody = parseSection(text, sectionName)\n        if (sectionBody.isBlank()) return \"\"\n        val titleMatch = Regex(\"\\\\[TITLE:\\\\s*(.+?)\\\\]\", RegexOption.IGNORE_CASE).find(sectionBody)\n        val rawTitle = titleMatch?.groupValues?.getOrNull(1)?.trim()?.take(60) ?: \"\"\n        return if (rawTitle.isNotEmpty()) SanitizationUtils.safeSlug(rawTitle) else \"\"\n    }\n\n    /**\n     * Strips thoughts, channel tokens, role prefixes, converts [break] to newlines,\n     * and collapses excessive newlines.\n     */\n    fun stripReplyControlTokens(reply: String): String {\n        var text = THINK_TAG_REGEX.replace(reply, \"\")\n        text = CHANNEL_THOUGHT_REGEX.replace(text, \"\")\n        text = END_OF_THOUGHT_REGEX.replace(text, \"\")\n        text = ROLE_PREFIX_REGEX.replace(text, \"\")\n        text = BREAK_TOKEN_REGEX.replace(text, \"\\n\\n\")\n        text = text.replace(Regex(\"\\\\n{3,}\"), \"\\n\\n\")\n        return text.trim()\n    }\n\n    /**\n     * Stream visible text: strips control tokens and hides incomplete tool tags at the end.\n     */\n    fun streamVisibleText(rawReply: String): String {\n        var visible = stripReplyControlTokens(rawReply)\n        val lastOpen = visible.lastIndexOf('[')\n        val lastClose = visible.lastIndexOf(']')\n        if (lastOpen > lastClose) {\n            visible = visible.substring(0, lastOpen)\n        }\n        return visible.trimEnd()\n    }\n\n    /**\n     * Extracts [RECALL: ...] and [CLOUD: ...] tool invocations from text.\n     */\n    fun extractToolInvocations(text: String): List<ToolInvocation> {\n        val invocations = mutableListOf<ToolInvocation>()\n        RECALL_TOOL_REGEX.findAll(text).forEach { match ->\n            invocations.add(\n                ToolInvocation(\n                    type = ToolType.RECALL,\n                    rawMatch = match.value,\n                    query = match.groupValues[1].trim()\n                )\n            )\n        }\n        CLOUD_TOOL_REGEX.findAll(text).forEach { match ->\n            invocations.add(\n                ToolInvocation(\n                    type = ToolType.CLOUD,\n                    rawMatch = match.value,\n                    query = match.groupValues[1].trim()\n                )\n            )\n        }\n        return invocations\n    }\n\n    /**\n     * Splits a raw reply into discrete chat bubbles using [break], paragraphs,\n     * and max length constraints, respecting maxReplyBubbles and maxBubbleChunkChars.\n     */\n    fun splitBubbles(\n        rawReply: String,\n        maxBubbles: Int = 3,\n        maxBubbleChunkChars: Int = 900\n    ): List<String> {\n        val cleaned = stripReplyControlTokens(rawReply)\n        if (cleaned.isBlank()) return emptyList()\n\n        // Split by double-newlines first\n        val parts = cleaned.split(Regex(\"\\\\n\\\\n+\")).map { it.trim() }.filter { it.isNotEmpty() }\n        val bubbles = mutableListOf<String>()\n\n        var currentBubble = StringBuilder()\n        for (part in parts) {\n            if (currentBubble.isEmpty()) {\n                currentBubble.append(part)\n            } else if (currentBubble.length + part.length + 2 <= maxBubbleChunkChars) {\n                currentBubble.append(\"\\n\\n\").append(part)\n            } else {\n                bubbles.add(currentBubble.toString().trim())\n                currentBubble = StringBuilder(part)\n                if (bubbles.size >= maxBubbles - 1) {\n                    break\n                }\n            }\n        }\n        if (currentBubble.isNotEmpty()) {\n            bubbles.add(currentBubble.toString().trim())\n        }\n\n        return bubbles.take(maxBubbles)\n    }\n}\n"
   },
   {
-    path: 'app/src/main/java/com/lilly/bot/domain/brain/LillyBrain.kt',
-    name: 'LillyBrain.kt',
-    category: 'kotlin_domain',
-    language: 'kotlin',
-    description: 'Central orchestrator: memory loader, tool caller, token budgeter, bubble dispatcher',
-    content: `package com.lilly.bot.domain.brain
-
-import com.lilly.bot.data.memory.FileMemoryRepository
-import com.lilly.bot.data.memory.LocalHybridRetriever
-import com.lilly.bot.data.network.CloudSearchClient
-import com.lilly.bot.data.network.InferenceClient
-import com.lilly.bot.data.storage.LillySettings
-import com.lilly.bot.data.storage.SecureCredentials
-import com.lilly.bot.domain.model.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import java.time.ZoneId
-
-class LillyBrain(
-    private val memoryRepo: FileMemoryRepository,
-    private val retriever: LocalHybridRetriever,
-    private val cloudClient: CloudSearchClient,
-    private val credentials: SecureCredentials,
-    val sleepMachine: SleepStateMachine = SleepStateMachine(),
-    val budgeter: TokenBudgeter = TokenBudgeter()
-) {
-    private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList())
-    val messages: StateFlow<List<ChatMessage>> = _messages.asStateFlow()
-
-    private val _companionState = MutableStateFlow(LillyCompanionState())
-    val companionState: StateFlow<LillyCompanionState> = _companionState.asStateFlow()
-
-    suspend fun sendMessage(
-        userInput: String,
-        settings: LillySettings,
-        inferenceClient: InferenceClient,
-        onStreamPreview: ((String) -> Unit)? = null
-    ): List<String> {
-        val apiKey = credentials.apiKey
-        if (apiKey.isBlank()) {
-            val errorMsg = "API Key is required to speak with Lilly. Please configure your key in Settings."
-            val errBubble = ChatMessage(role = Role.ASSISTANT, content = errorMsg, bubbles = listOf(errorMsg))
-            _messages.value = _messages.value + errBubble
-            return listOf(errorMsg)
-        }
-
-        val now = System.currentTimeMillis()
-        val wakeResult = sleepMachine.onUserMessageReceived(now)
-        _companionState.value = sleepMachine.getCurrentState()
-
-        if (wakeResult.shouldResetContext && settings.resetContextOnStart) {
-            _messages.value = emptyList()
-        }
-
-        val userMsg = ChatMessage(
-            role = Role.USER,
-            content = userInput,
-            estimatedTokens = budgeter.estimateTokens(userInput)
-        )
-        _messages.value = _messages.value + userMsg
-
-        var systemPrompt = memoryRepo.loadSystemPrompt()
-        if (wakeResult.wakingPromptPrefix.isNotEmpty()) {
-            systemPrompt = "\${wakeResult.wakingPromptPrefix}\\n\\n\$systemPrompt"
-        }
-
-        val timezone = try {
-            ZoneId.of(settings.timezoneName)
-        } catch (e: Exception) {
-            ZoneId.of("America/Chicago")
-        }
-
-        val workingHistory = _messages.value.toMutableList()
-        val executedTools = mutableListOf<ToolInvocation>()
-
-        var currentAttempt = 0
-        val maxToolIterations = 3
-        var finalRawResponse = ""
-
-        _companionState.value = _companionState.value.copy(isStreaming = true, streamBuffer = "")
-
-        while (currentAttempt < maxToolIterations) {
-            currentAttempt++
-
-            val sysTokens = budgeter.estimateTokens(systemPrompt)
-            val budgetedHistory = budgeter.budgetHistory(workingHistory, sysTokens)
-
-            val rawResponse = if (settings.streamPreviewEnabled) {
-                var streamingAcc = StringBuilder()
-                inferenceClient.streamCompletion(
-                    systemPrompt = systemPrompt,
-                    history = budgetedHistory,
-                    settings = settings,
-                    apiKey = apiKey
-                ) { token ->
-                    streamingAcc.append(token)
-                    val visible = TextParsers.streamVisibleText(streamingAcc.toString())
-                    _companionState.value = _companionState.value.copy(streamBuffer = visible)
-                    onStreamPreview?.invoke(visible)
-                }
-            } else {
-                inferenceClient.generateCompletion(
-                    systemPrompt = systemPrompt,
-                    history = budgetedHistory,
-                    settings = settings,
-                    apiKey = apiKey
-                )
-            }
-
-            finalRawResponse = rawResponse
-
-            val invocations = TextParsers.extractToolInvocations(rawResponse)
-            if (invocations.isEmpty()) {
-                break
-            }
-
-            var anyToolExecuted = false
-            for (tool in invocations) {
-                if (tool.type == ToolType.RECALL) {
-                    val recallResults = retriever.recall(tool.query)
-                    val snippet = if (recallResults.isNotEmpty()) {
-                        recallResults.joinToString("\\n\\n") { "[Memory from \${it.tier.dirName}/\${it.filename}]: \${it.snippet}" }
-                    } else {
-                        "[No relevant memories found for: '\${tool.query}']"
-                    }
-                    executedTools.add(tool.copy(result = snippet, isCompleted = true))
-                    workingHistory.add(ChatMessage(role = Role.ASSISTANT, content = rawResponse))
-                    workingHistory.add(ChatMessage(role = Role.SYSTEM, content = "[RECALL RESULT]:\\n\$snippet"))
-                    anyToolExecuted = true
-                } else if (tool.type == ToolType.CLOUD && settings.cloudSearchEnabled) {
-                    val cloudKey = credentials.getEffectiveCloudApiKey()
-                    val result = cloudClient.executeCloudAgentInstruction(tool.query, settings, cloudKey)
-                    executedTools.add(tool.copy(result = result, isCompleted = true))
-                    workingHistory.add(ChatMessage(role = Role.ASSISTANT, content = rawResponse))
-                    workingHistory.add(ChatMessage(role = Role.SYSTEM, content = "[CLOUD AGENT RESULT]:\\n\$result"))
-                    anyToolExecuted = true
-                }
-            }
-
-            if (!anyToolExecuted) break
-        }
-
-        _companionState.value = _companionState.value.copy(isStreaming = false, streamBuffer = "")
-
-        val bubbles = TextParsers.splitBubbles(
-            rawReply = finalRawResponse,
-            maxBubbles = settings.maxReplyBubbles,
-            maxBubbleChunkChars = settings.maxBubbleChunkChars
-        )
-        val cleanContent = TextParsers.stripReplyControlTokens(finalRawResponse)
-
-        val assistantMessage = ChatMessage(
-            role = Role.ASSISTANT,
-            content = cleanContent,
-            bubbles = bubbles,
-            estimatedTokens = budgeter.estimateTokens(cleanContent),
-            triggeredTools = executedTools
-        )
-        _messages.value = _messages.value + assistantMessage
-        memoryRepo.appendToDailyTranscript(userInput, cleanContent, timezone)
-
-        return bubbles
-    }
-}`
+    path: "app/src/main/java/com/lilly/bot/domain/brain/TokenBudgeter.kt",
+    name: "TokenBudgeter.kt",
+    category: "kotlin_domain",
+    language: "kotlin",
+    description: "Context utilization math, token reservation, and history pruning calculator",
+    content: "package com.lilly.bot.domain.brain\n\nimport com.lilly.bot.domain.model.ChatMessage\nimport kotlin.math.max\n\nclass TokenBudgeter(\n    var modelContextTokens: Int = 8192,\n    var contextUtilizationRatio: Float = 0.95f,\n    var responseTokenReserve: Int = 2048,\n    var conversationWindowMessages: Int = 0\n) {\n\n    /**\n     * Approximates token count for text (~4 characters per token average).\n     */\n    fun estimateTokens(text: String): Int {\n        if (text.isEmpty()) return 0\n        // Heuristic combining word boundaries and character counts\n        val words = text.split(Regex(\"\\\\s+\")).size\n        val chars = text.length\n        return max(words, (chars / 3.8).toInt())\n    }\n\n    /**\n     * Calculates maximum tokens allocated for conversation history (excluding reserve and system prompt).\n     */\n    fun calculateAvailableHistoryBudget(systemPromptTokens: Int): Int {\n        val totalUsable = (modelContextTokens * contextUtilizationRatio).toInt()\n        val budget = totalUsable - responseTokenReserve - systemPromptTokens\n        return max(256, budget)\n    }\n\n    /**\n     * Prunes and formats conversation history to fit strictly within token budget.\n     * Walks backwards from the newest message to older messages.\n     */\n    fun budgetHistory(\n        messages: List<ChatMessage>,\n        systemPromptTokens: Int\n    ): List<ChatMessage> {\n        if (messages.isEmpty()) return emptyList()\n\n        // Apply message count window cap if set\n        var candidateList = if (conversationWindowMessages > 0) {\n            messages.takeLast(conversationWindowMessages)\n        } else {\n            messages\n        }\n\n        val availableBudget = calculateAvailableHistoryBudget(systemPromptTokens)\n        var usedTokens = 0\n        val budgeted = mutableListOf<ChatMessage>()\n\n        // Walk backwards: newest message is kept first\n        for (i in candidateList.indices.reversed()) {\n            val msg = candidateList[i]\n            val cost = if (msg.estimatedTokens > 0) msg.estimatedTokens else estimateTokens(msg.content)\n            if (usedTokens + cost > availableBudget && budgeted.isNotEmpty()) {\n                // Out of budget, discard older messages\n                break\n            }\n            usedTokens += cost\n            budgeted.add(msg)\n        }\n\n        return budgeted.reversed()\n    }\n}\n"
   },
   {
-    path: 'app/src/main/java/com/lilly/bot/data/storage/SecureCredentials.kt',
-    name: 'SecureCredentials.kt',
-    category: 'kotlin_data',
-    language: 'kotlin',
-    description: 'EncryptedSharedPreferences backed by AndroidKeyStore for API keys',
-    content: `package com.lilly.bot.data.storage
-
-import android.content.Context
-import android.content.SharedPreferences
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
-
-class SecureCredentials(context: Context) {
-
-    private val sharedPreferences: SharedPreferences
-
-    init {
-        val masterKey = MasterKey.Builder(context)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
-
-        sharedPreferences = EncryptedSharedPreferences.create(
-            context,
-            "lilly_secure_prefs",
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
-    }
-
-    var apiKey: String
-        get() = sharedPreferences.getString("api_key", "") ?: ""
-        set(value) = sharedPreferences.edit().putString("api_key", value).apply()
-
-    var cloudSearchApiKey: String
-        get() = sharedPreferences.getString("cloud_search_api_key", "") ?: ""
-        set(value) = sharedPreferences.edit().putString("cloud_search_api_key", value).apply()
-
-    fun getEffectiveCloudApiKey(): String {
-        val cloudKey = cloudSearchApiKey.trim()
-        return if (cloudKey.isNotEmpty()) cloudKey else apiKey.trim()
-    }
-}`
+    path: "app/src/main/java/com/lilly/bot/domain/brain/SleepStateMachine.kt",
+    name: "SleepStateMachine.kt",
+    category: "kotlin_domain",
+    language: "kotlin",
+    description: "State machine transitioning companion between awake, dream, and deep sleep",
+    content: "package com.lilly.bot.domain.brain\n\nimport com.lilly.bot.domain.model.CompanionMode\nimport com.lilly.bot.domain.model.LillyCompanionState\n\nclass SleepStateMachine(\n    var idleSortAfterMinutes: Int = 5,\n    var dreamShutdownMinutes: Int = 30,\n    var contextTimeoutSeconds: Int = 1800,\n    var sleepInertiaDurationSeconds: Int = 45\n) {\n    private var state = LillyCompanionState(mode = CompanionMode.AWAKE)\n\n    fun getCurrentState(): LillyCompanionState = state\n\n    /**\n     * Called whenever user sends a message or interacts with Lilly.\n     * Evaluates whether she was asleep, experiencing sleep inertia, or active.\n     */\n    fun onUserMessageReceived(now: Long = System.currentTimeMillis()): WakeEventResult {\n        val previousMode = state.mode\n        val elapsedSinceActive = (now - state.lastActiveTimestamp) / 1000\n\n        val contextTimedOut = elapsedSinceActive >= contextTimeoutSeconds\n\n        val result = when (previousMode) {\n            CompanionMode.AWAKE -> {\n                if (contextTimedOut) {\n                    WakeEventResult(\n                        shouldResetContext = true,\n                        wasInterrupted = false,\n                        wakingPromptPrefix = \"\"\n                    )\n                } else {\n                    WakeEventResult(\n                        shouldResetContext = false,\n                        wasInterrupted = false,\n                        wakingPromptPrefix = \"\"\n                    )\n                }\n            }\n            CompanionMode.SLEEP_INERTIA -> {\n                // Already in waking process\n                val inertiaElapsed = (now - (state.inertiaWakingStartTime ?: now)) / 1000\n                if (inertiaElapsed >= sleepInertiaDurationSeconds) {\n                    state = state.copy(mode = CompanionMode.AWAKE, inertiaWakingStartTime = null)\n                }\n                WakeEventResult(\n                    shouldResetContext = false,\n                    wasInterrupted = true,\n                    wakingPromptPrefix = \"[System note: Lilly is waking up and experiencing slight sleep inertia. Respond naturally as someone rubbing sleep from their eyes.]\"\n                )\n            }\n            CompanionMode.DREAMING, CompanionMode.DEEP_SLEEP -> {\n                // Interrupted from sleep! Enter SLEEP_INERTIA\n                state = state.copy(\n                    mode = CompanionMode.SLEEP_INERTIA,\n                    inertiaWakingStartTime = now,\n                    sleepStartTime = null\n                )\n                WakeEventResult(\n                    shouldResetContext = contextTimedOut,\n                    wasInterrupted = true,\n                    wakingPromptPrefix = if (previousMode == CompanionMode.DREAMING) {\n                        \"[System note: Lilly was mid-dream/reflecting when the user suddenly spoke. Wake up with gentle surprise or slight disorientation.]\"\n                    } else {\n                        \"[System note: Lilly was in deep sleep and is waking up. Acknowledge waking up naturally.]\"\n                    }\n                )\n            }\n        }\n\n        state = state.copy(\n            lastActiveTimestamp = now\n        )\n        return result\n    }\n\n    /**\n     * Periodic evaluation check (called by background service or timer).\n     */\n    fun evaluateIdleTick(now: Long = System.currentTimeMillis()): TransitionEvent? {\n        val idleSeconds = (now - state.lastActiveTimestamp) / 1000\n\n        when (state.mode) {\n            CompanionMode.AWAKE -> {\n                if (idleSeconds >= idleSortAfterMinutes * 60) {\n                    state = state.copy(\n                        mode = CompanionMode.DREAMING,\n                        sleepStartTime = now\n                    )\n                    return TransitionEvent.ENTERED_DREAMING\n                }\n            }\n            CompanionMode.SLEEP_INERTIA -> {\n                val inertiaElapsed = (now - (state.inertiaWakingStartTime ?: now)) / 1000\n                if (inertiaElapsed >= sleepInertiaDurationSeconds) {\n                    state = state.copy(\n                        mode = CompanionMode.AWAKE,\n                        inertiaWakingStartTime = null\n                    )\n                    return TransitionEvent.WOKE_FULL_ALERT\n                }\n            }\n            CompanionMode.DREAMING -> {\n                val dreamSeconds = (now - (state.sleepStartTime ?: now)) / 1000\n                if (dreamSeconds >= dreamShutdownMinutes * 60) {\n                    state = state.copy(mode = CompanionMode.DEEP_SLEEP)\n                    return TransitionEvent.ENTERED_DEEP_SLEEP\n                }\n            }\n            CompanionMode.DEEP_SLEEP -> {\n                // Stays in deep sleep until user message\n            }\n        }\n        return null\n    }\n\n    fun forceState(newMode: CompanionMode) {\n        state = state.copy(mode = newMode)\n    }\n\n    data class WakeEventResult(\n        val shouldResetContext: Boolean,\n        val wasInterrupted: Boolean,\n        val wakingPromptPrefix: String\n    )\n\n    enum class TransitionEvent {\n        ENTERED_DREAMING,\n        ENTERED_DEEP_SLEEP,\n        WOKE_FULL_ALERT\n    }\n}\n"
   },
   {
-    path: 'app/src/main/java/com/lilly/bot/data/storage/SettingsRepository.kt',
-    name: 'SettingsRepository.kt',
-    category: 'kotlin_data',
-    language: 'kotlin',
-    description: 'Jetpack DataStore preferences for all 34 configurable parameters',
-    content: `package com.lilly.bot.data.storage
-
-import android.content.Context
-import androidx.datastore.preferences.core.*
-import androidx.datastore.preferences.preferencesDataStore
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-
-val Context.dataStore by preferencesDataStore(name = "lilly_settings")
-
-enum class InferenceProviderMode {
-    OPENAI_COMPATIBLE,
-    GEMINI_NATIVE
-}
-
-enum class RetrieverMode {
-    LOCAL_HYBRID,
-    REMOTE_HTTP
-}
-
-data class LillySettings(
-    val inferenceProviderMode: InferenceProviderMode = InferenceProviderMode.OPENAI_COMPATIBLE,
-    val apiUrl: String = "http://127.0.0.1:8080/v1/chat/completions",
-    val modelName: String = "gemma-4-26b-a4b-it",
-    val temperature: Float = 0.8f,
-    val modelContextTokens: Int = 8192,
-    val contextUtilizationRatio: Float = 0.95f,
-    val responseTokenReserve: Int = 2048,
-    val conversationWindowMessages: Int = 0,
-    val resetContextOnStart: Boolean = true,
-    val requestTimeoutSeconds: Int = 120,
-    val streamPreviewEnabled: Boolean = true,
-    val streamPreviewEditIntervalSeconds: Float = 1.2f,
-    val streamPreviewMinDeltaChars: Int = 60,
-
-    val cloudSearchEnabled: Boolean = true,
-    val cloudSearchModel: String = "gemini-2.5-flash-lite",
-    val retrieverMode: RetrieverMode = RetrieverMode.LOCAL_HYBRID,
-    val retrieverApiUrl: String = "http://127.0.0.1:5001",
-
-    val timezoneName: String = "America/Chicago",
-    val activeChatWindowMinutes: Int = 5,
-    val idleSortAfterMinutes: Int = 5,
-    val dreamShutdownMinutes: Int = 30,
-    val contextTimeoutSeconds: Int = 1800,
-    val shortTermRetentionDays: Int = 30,
-    val medTermRetentionDays: Int = 120,
-    val longTermRetentionDays: Int = 365,
-    val shortTermFileLimit: Int = 20,
-    val shortTermLineLimit: Int = 100,
-    val medTermFileLimit: Int = 15,
-    val medTermLineLimit: Int = 80,
-    val longTermFileLimit: Int = 15,
-    val longTermLineLimit: Int = 80,
-    val reflectionWebTopicLimit: Int = 2,
-    val maxReplyBubbles: Int = 3,
-    val maxBubbleChunkChars: Int = 900,
-    val maxMessageChars: Int = 1900
-)`
+    path: "app/src/main/java/com/lilly/bot/domain/brain/LillyBrain.kt",
+    name: "LillyBrain.kt",
+    category: "kotlin_domain",
+    language: "kotlin",
+    description: "Central companion coordinator handling input, tool execution, and inference",
+    content: "package com.lilly.bot.domain.brain\n\nimport com.lilly.bot.data.memory.FileMemoryRepository\nimport com.lilly.bot.data.memory.LocalHybridRetriever\nimport com.lilly.bot.data.network.CloudSearchClient\nimport com.lilly.bot.data.network.InferenceClient\nimport com.lilly.bot.data.storage.LillySettings\nimport com.lilly.bot.data.storage.SecureCredentials\nimport com.lilly.bot.domain.model.*\nimport kotlinx.coroutines.flow.MutableStateFlow\nimport kotlinx.coroutines.flow.StateFlow\nimport kotlinx.coroutines.flow.asStateFlow\nimport java.time.ZoneId\n\nclass LillyBrain(\n    private val memoryRepo: FileMemoryRepository,\n    private val retriever: LocalHybridRetriever,\n    private val cloudClient: CloudSearchClient,\n    private val credentials: SecureCredentials,\n    val sleepMachine: SleepStateMachine = SleepStateMachine(),\n    val budgeter: TokenBudgeter = TokenBudgeter()\n) {\n    private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList())\n    val messages: StateFlow<List<ChatMessage>> = _messages.asStateFlow()\n\n    private val _companionState = MutableStateFlow(LillyCompanionState())\n    val companionState: StateFlow<LillyCompanionState> = _companionState.asStateFlow()\n\n    fun getSystemPrompt(forceReload: Boolean = false): String {\n        return memoryRepo.loadSystemPrompt(forceReload)\n    }\n\n    fun clearHistory() {\n        _messages.value = emptyList()\n    }\n\n    /**\n     * Main conversation turn: processes user input, manages sleep states,\n     * performs token budgeting, executes tool loops, and splits reply bubbles.\n     */\n    suspend fun sendMessage(\n        userInput: String,\n        settings: LillySettings,\n        inferenceClient: InferenceClient,\n        onStreamPreview: ((String) -> Unit)? = null\n    ): List<String> {\n        val apiKey = credentials.apiKey\n        if (apiKey.isBlank()) {\n            val errorMsg = \"API Key is required to speak with Lilly. Please configure your key in Settings.\"\n            val errBubble = ChatMessage(role = Role.ASSISTANT, content = errorMsg, bubbles = listOf(errorMsg))\n            _messages.value = _messages.value + errBubble\n            return listOf(errorMsg)\n        }\n\n        val now = System.currentTimeMillis()\n        val wakeResult = sleepMachine.onUserMessageReceived(now)\n        _companionState.value = sleepMachine.getCurrentState()\n\n        if (wakeResult.shouldResetContext && settings.resetContextOnStart) {\n            clearHistory()\n        }\n\n        // Add user message\n        val userMsg = ChatMessage(\n            role = Role.USER,\n            content = userInput,\n            estimatedTokens = budgeter.estimateTokens(userInput)\n        )\n        _messages.value = _messages.value + userMsg\n\n        // Assemble base system prompt\n        var systemPrompt = memoryRepo.loadSystemPrompt()\n        if (wakeResult.wakingPromptPrefix.isNotEmpty()) {\n            systemPrompt = \"${wakeResult.wakingPromptPrefix}\\n\\n$systemPrompt\"\n        }\n\n        val timezone = try {\n            ZoneId.of(settings.timezoneName)\n        } catch (e: Exception) {\n            ZoneId.of(\"America/Chicago\")\n        }\n\n        val workingHistory = _messages.value.toMutableList()\n        val executedTools = mutableListOf<ToolInvocation>()\n\n        var currentAttempt = 0\n        val maxToolIterations = 3\n        var finalRawResponse = \"\"\n\n        _companionState.value = _companionState.value.copy(isStreaming = true, streamBuffer = \"\")\n\n        while (currentAttempt < maxToolIterations) {\n            currentAttempt++\n\n            // Budget history before sending\n            val sysTokens = budgeter.estimateTokens(systemPrompt)\n            val budgetedHistory = budgeter.budgetHistory(workingHistory, sysTokens)\n\n            var streamingAcc = StringBuilder()\n\n            val rawResponse = if (settings.streamPreviewEnabled) {\n                inferenceClient.streamCompletion(\n                    systemPrompt = systemPrompt,\n                    history = budgetedHistory,\n                    settings = settings,\n                    apiKey = apiKey\n                ) { token ->\n                    streamingAcc.append(token)\n                    val visible = TextParsers.streamVisibleText(streamingAcc.toString())\n                    _companionState.value = _companionState.value.copy(streamBuffer = visible)\n                    onStreamPreview?.invoke(visible)\n                }\n            } else {\n                inferenceClient.generateCompletion(\n                    systemPrompt = systemPrompt,\n                    history = budgetedHistory,\n                    settings = settings,\n                    apiKey = apiKey\n                )\n            }\n\n            finalRawResponse = rawResponse\n\n            // Check for tool invocations\n            val invocations = TextParsers.extractToolInvocations(rawResponse)\n            if (invocations.isEmpty()) {\n                // Done, no more tools invoked\n                break\n            }\n\n            // Execute detected tools\n            var anyToolExecuted = false\n            for (tool in invocations) {\n                if (tool.type == ToolType.RECALL) {\n                    val recallResults = retriever.recall(tool.query)\n                    val snippet = if (recallResults.isNotEmpty()) {\n                        recallResults.joinToString(\"\\n\\n\") { \"[Memory from ${it.tier.dirName}/${it.filename}]: ${it.snippet}\" }\n                    } else {\n                        \"[No relevant memories found for: '${tool.query}']\"\n                    }\n                    val completed = tool.copy(result = snippet, isCompleted = true)\n                    executedTools.add(completed)\n\n                    workingHistory.add(ChatMessage(role = Role.ASSISTANT, content = rawResponse))\n                    workingHistory.add(ChatMessage(role = Role.SYSTEM, content = \"[RECALL RESULT]:\\n$snippet\"))\n                    anyToolExecuted = true\n                } else if (tool.type == ToolType.CLOUD && settings.cloudSearchEnabled) {\n                    val cloudKey = credentials.getEffectiveCloudApiKey()\n                    val result = cloudClient.executeCloudAgentInstruction(tool.query, settings, cloudKey)\n                    val completed = tool.copy(result = result, isCompleted = true)\n                    executedTools.add(completed)\n\n                    workingHistory.add(ChatMessage(role = Role.ASSISTANT, content = rawResponse))\n                    workingHistory.add(ChatMessage(role = Role.SYSTEM, content = \"[CLOUD AGENT RESULT]:\\n$result\"))\n                    anyToolExecuted = true\n                }\n            }\n\n            if (!anyToolExecuted) {\n                break\n            }\n        }\n\n        _companionState.value = _companionState.value.copy(isStreaming = false, streamBuffer = \"\")\n\n        // Clean final output and split bubbles\n        val bubbles = TextParsers.splitBubbles(\n            rawReply = finalRawResponse,\n            maxBubbles = settings.maxReplyBubbles,\n            maxBubbleChunkChars = settings.maxBubbleChunkChars\n        )\n\n        val cleanContent = TextParsers.stripReplyControlTokens(finalRawResponse)\n\n        val assistantMessage = ChatMessage(\n            role = Role.ASSISTANT,\n            content = cleanContent,\n            bubbles = bubbles,\n            estimatedTokens = budgeter.estimateTokens(cleanContent),\n            triggeredTools = executedTools\n        )\n\n        _messages.value = _messages.value + assistantMessage\n\n        // Append to short-term daily transcript\n        memoryRepo.appendToDailyTranscript(userInput, cleanContent, timezone)\n\n        return bubbles\n    }\n}\n"
   },
   {
-    path: 'app/src/main/java/com/lilly/bot/data/memory/FileMemoryRepository.kt',
-    name: 'FileMemoryRepository.kt',
-    category: 'kotlin_data',
-    language: 'kotlin',
-    description: '4-tier plaintext filesystem, signature caching, TOOL_MECHANICS_BLOCK, and SAF ZIP export',
-    content: `package com.lilly.bot.data.memory
-
-import android.content.Context
-import com.lilly.bot.domain.brain.SanitizationUtils
-import com.lilly.bot.domain.model.MemoryItem
-import com.lilly.bot.domain.model.MemoryTier
-import java.io.*
-import java.time.LocalDate
-import java.time.ZoneId
-import java.util.zip.ZipEntry
-import java.util.zip.ZipInputStream
-import java.util.zip.ZipOutputStream
-
-class FileMemoryRepository(private val context: Context) {
-
-    val dataDir: File = File(context.filesDir, "LillyBot")
-    val memBase: File = File(dataDir, "memory")
-
-    private var cachedSystemPrompt: String? = null
-    private var cachedPermSignature: String = ""
-
-    val TOOL_MECHANICS_BLOCK = """
-
-
-=== HOW TO USE YOUR BRAIN ===
-You have access to a set of internal tools you invoke by writing special tags in your response.
-[RECALL: <your query here>] — Search your memory library semantically for relevant information. Use this proactively mid-conversation whenever you need to remember something about the user or past events.
-[CLOUD: <your instruction here>] — Send a prompt to your Cloud Agent (a fellow AI with internet, YouTube, and Google Drive access) to do research or math for you. Give it full instructions. You will get its response back before talking to the user.
-[break] — Split your response into a separate Discord message bubble.
-Only use these tools when they are genuinely useful. Never mention them out loud to User.
-""".trimStart()
-
-    fun scanPermMemorySignature(): String {
-        val permDir = getTierDir(MemoryTier.PERM)
-        val files = permDir.listFiles { f -> f.isFile && f.name.endsWith(".txt") }
-            ?.sortedBy { it.name }
-            ?: return "missing"
-        if (files.isEmpty()) return "missing"
-        return files.joinToString("|") { "\${it.name}:\${it.lastModified()}:\${it.length()}" }
-    }
-
-    fun loadSystemPrompt(forceReload: Boolean = false): String {
-        val permSignature = scanPermMemorySignature()
-        if (!forceReload && cachedSystemPrompt != null && permSignature == cachedPermSignature) {
-            return cachedSystemPrompt!!
-        }
-
-        val permDir = getTierDir(MemoryTier.PERM)
-        val files = permDir.listFiles { f -> f.isFile && f.name.endsWith(".txt") }
-            ?.sortedBy { it.name }
-            ?: emptyList()
-
-        val contents = files.mapNotNull { file ->
-            val decoded = SanitizationUtils.robustDecode(file.readBytes())
-            val sanitized = SanitizationUtils.sanitizeSmartChars(decoded).trim()
-            if (sanitized.isNotEmpty()) sanitized else null
-        }
-
-        val assembledBase = contents.joinToString("\\n\\n")
-        val fullPrompt = if (assembledBase.isNotEmpty()) {
-            "\$assembledBase\\n\\n\$TOOL_MECHANICS_BLOCK"
-        } else {
-            TOOL_MECHANICS_BLOCK
-        }
-
-        cachedSystemPrompt = fullPrompt
-        cachedPermSignature = permSignature
-        return fullPrompt
-    }
-
-    fun getTierDir(tier: MemoryTier): File = File(memBase, tier.dirName)
-}`
+    path: "app/src/main/java/com/lilly/bot/data/storage/SecureCredentials.kt",
+    name: "SecureCredentials.kt",
+    category: "kotlin_data",
+    language: "kotlin",
+    description: "Hardware AndroidKeyStore backed EncryptedSharedPreferences for API keys",
+    content: "package com.lilly.bot.data.storage\n\nimport android.content.Context\nimport android.content.SharedPreferences\nimport androidx.security.crypto.EncryptedSharedPreferences\nimport androidx.security.crypto.MasterKey\n\nclass SecureCredentials(context: Context) {\n\n    private val sharedPreferences: SharedPreferences\n\n    init {\n        val masterKey = MasterKey.Builder(context)\n            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)\n            .build()\n\n        sharedPreferences = EncryptedSharedPreferences.create(\n            context,\n            \"lilly_secure_prefs\",\n            masterKey,\n            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,\n            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM\n        )\n    }\n\n    var apiKey: String\n        get() = sharedPreferences.getString(KEY_API_KEY, \"\") ?: \"\"\n        set(value) = sharedPreferences.edit().putString(KEY_API_KEY, value).apply()\n\n    var cloudSearchApiKey: String\n        get() = sharedPreferences.getString(KEY_CLOUD_SEARCH_API_KEY, \"\") ?: \"\"\n        set(value) = sharedPreferences.edit().putString(KEY_CLOUD_SEARCH_API_KEY, value).apply()\n\n    fun getEffectiveCloudApiKey(): String {\n        val cloudKey = cloudSearchApiKey.trim()\n        return if (cloudKey.isNotEmpty()) cloudKey else apiKey.trim()\n    }\n\n    companion object {\n        private const val KEY_API_KEY = \"api_key\"\n        private const val KEY_CLOUD_SEARCH_API_KEY = \"cloud_search_api_key\"\n    }\n}\n"
   },
   {
-    path: 'app/src/main/java/com/lilly/bot/data/memory/MemoryPruner.kt',
-    name: 'MemoryPruner.kt',
-    category: 'kotlin_data',
-    language: 'kotlin',
-    description: 'Enforces retention schedules, line limits, and file limits across tiers',
-    content: `package com.lilly.bot.data.memory
-
-import com.lilly.bot.data.storage.LillySettings
-import com.lilly.bot.domain.model.MemoryTier
-import java.util.concurrent.TimeUnit
-
-class MemoryPruner(private val repository: FileMemoryRepository) {
-
-    fun runPrune(settings: LillySettings, now: Long = System.currentTimeMillis()) {
-        val retentionMap = mapOf(
-            MemoryTier.SHORT to Pair(settings.shortTermRetentionDays, settings.shortTermFileLimit),
-            MemoryTier.MED to Pair(settings.medTermRetentionDays, settings.medTermFileLimit),
-            MemoryTier.LONG to Pair(settings.longTermRetentionDays, settings.longTermFileLimit),
-            MemoryTier.MEDIA to Pair(settings.shortTermRetentionDays, 50)
-        )
-
-        for ((tier, limits) in retentionMap) {
-            val (retentionDays, fileLimit) = limits
-            val dir = repository.getTierDir(tier)
-            val files = dir.listFiles { f -> f.isFile } ?: continue
-            val maxAgeMillis = TimeUnit.DAYS.toMillis(retentionDays.toLong())
-
-            for (file in files) {
-                if (now - file.lastModified() > maxAgeMillis) {
-                    file.delete()
-                }
-            }
-        }
-    }
-}`
+    path: "app/src/main/java/com/lilly/bot/data/storage/SettingsRepository.kt",
+    name: "SettingsRepository.kt",
+    category: "kotlin_data",
+    language: "kotlin",
+    description: "Jetpack DataStore preferences repository for all 34 settings parameters",
+    content: "package com.lilly.bot.data.storage\n\nimport android.content.Context\nimport androidx.datastore.preferences.core.*\nimport androidx.datastore.preferences.preferencesDataStore\nimport kotlinx.coroutines.flow.Flow\nimport kotlinx.coroutines.flow.map\n\nval Context.dataStore by preferencesDataStore(name = \"lilly_settings\")\n\nenum class InferenceProviderMode {\n    OPENAI_COMPATIBLE,\n    GEMINI_NATIVE\n}\n\nenum class RetrieverMode {\n    LOCAL_HYBRID,\n    REMOTE_HTTP\n}\n\ndata class LillySettings(\n    val inferenceProviderMode: InferenceProviderMode = InferenceProviderMode.OPENAI_COMPATIBLE,\n    val apiUrl: String = \"http://127.0.0.1:8080/v1/chat/completions\",\n    val modelName: String = \"gemma-4-26b-a4b-it\",\n    val temperature: Float = 0.8f,\n    val modelContextTokens: Int = 8192,\n    val contextUtilizationRatio: Float = 0.95f,\n    val responseTokenReserve: Int = 2048,\n    val conversationWindowMessages: Int = 0,\n    val resetContextOnStart: Boolean = true,\n    val requestTimeoutSeconds: Int = 120,\n    val streamPreviewEnabled: Boolean = true,\n    val streamPreviewEditIntervalSeconds: Float = 1.2f,\n    val streamPreviewMinDeltaChars: Int = 60,\n\n    val cloudSearchEnabled: Boolean = true,\n    val cloudSearchModel: String = \"gemini-2.5-flash-lite\",\n    val retrieverMode: RetrieverMode = RetrieverMode.LOCAL_HYBRID,\n    val retrieverApiUrl: String = \"http://127.0.0.1:5001\",\n\n    val timezoneName: String = \"America/Chicago\",\n    val activeChatWindowMinutes: Int = 5,\n    val idleSortAfterMinutes: Int = 5,\n    val dreamShutdownMinutes: Int = 30,\n    val contextTimeoutSeconds: Int = 1800,\n    val shortTermRetentionDays: Int = 30,\n    val medTermRetentionDays: Int = 120,\n    val longTermRetentionDays: Int = 365,\n    val shortTermFileLimit: Int = 20,\n    val shortTermLineLimit: Int = 100,\n    val medTermFileLimit: Int = 15,\n    val medTermLineLimit: Int = 80,\n    val longTermFileLimit: Int = 15,\n    val longTermLineLimit: Int = 80,\n    val reflectionWebTopicLimit: Int = 2,\n    val maxReplyBubbles: Int = 3,\n    val maxBubbleChunkChars: Int = 900,\n    val maxMessageChars: Int = 1900\n)\n\nclass SettingsRepository(private val context: Context) {\n\n    private object PreferencesKeys {\n        val INFERENCE_PROVIDER_MODE = stringPreferencesKey(\"inference_provider_mode\")\n        val API_URL = stringPreferencesKey(\"api_url\")\n        val MODEL_NAME = stringPreferencesKey(\"model_name\")\n        val TEMPERATURE = floatPreferencesKey(\"temperature\")\n        val MODEL_CONTEXT_TOKENS = intPreferencesKey(\"model_context_tokens\")\n        val CONTEXT_UTILIZATION_RATIO = floatPreferencesKey(\"context_utilization_ratio\")\n        val RESPONSE_TOKEN_RESERVE = intPreferencesKey(\"response_token_reserve\")\n        val CONVERSATION_WINDOW_MESSAGES = intPreferencesKey(\"conversation_window_messages\")\n        val RESET_CONTEXT_ON_START = booleanPreferencesKey(\"reset_context_on_start\")\n        val REQUEST_TIMEOUT_SECONDS = intPreferencesKey(\"request_timeout_seconds\")\n        val STREAM_PREVIEW_ENABLED = booleanPreferencesKey(\"stream_preview_enabled\")\n        val STREAM_PREVIEW_EDIT_INTERVAL = floatPreferencesKey(\"stream_preview_edit_interval\")\n        val STREAM_PREVIEW_MIN_DELTA = intPreferencesKey(\"stream_preview_min_delta\")\n\n        val CLOUD_SEARCH_ENABLED = booleanPreferencesKey(\"cloud_search_enabled\")\n        val CLOUD_SEARCH_MODEL = stringPreferencesKey(\"cloud_search_model\")\n        val RETRIEVER_MODE = stringPreferencesKey(\"retriever_mode\")\n        val RETRIEVER_API_URL = stringPreferencesKey(\"retriever_api_url\")\n\n        val TIMEZONE_NAME = stringPreferencesKey(\"timezone_name\")\n        val ACTIVE_CHAT_WINDOW_MINUTES = intPreferencesKey(\"active_chat_window_minutes\")\n        val IDLE_SORT_AFTER_MINUTES = intPreferencesKey(\"idle_sort_after_minutes\")\n        val DREAM_SHUTDOWN_MINUTES = intPreferencesKey(\"dream_shutdown_minutes\")\n        val CONTEXT_TIMEOUT_SECONDS = intPreferencesKey(\"context_timeout_seconds\")\n        val SHORT_TERM_RETENTION_DAYS = intPreferencesKey(\"short_term_retention_days\")\n        val MED_TERM_RETENTION_DAYS = intPreferencesKey(\"med_term_retention_days\")\n        val LONG_TERM_RETENTION_DAYS = intPreferencesKey(\"long_term_retention_days\")\n        val SHORT_TERM_FILE_LIMIT = intPreferencesKey(\"short_term_file_limit\")\n        val SHORT_TERM_LINE_LIMIT = intPreferencesKey(\"short_term_line_limit\")\n        val MED_TERM_FILE_LIMIT = intPreferencesKey(\"med_term_file_limit\")\n        val MED_TERM_LINE_LIMIT = intPreferencesKey(\"med_term_line_limit\")\n        val LONG_TERM_FILE_LIMIT = intPreferencesKey(\"long_term_file_limit\")\n        val LONG_TERM_LINE_LIMIT = intPreferencesKey(\"long_term_line_limit\")\n        val REFLECTION_WEB_TOPIC_LIMIT = intPreferencesKey(\"reflection_web_topic_limit\")\n        val MAX_REPLY_BUBBLES = intPreferencesKey(\"max_reply_bubbles\")\n        val MAX_BUBBLE_CHUNK_CHARS = intPreferencesKey(\"max_bubble_chunk_chars\")\n        val MAX_MESSAGE_CHARS = intPreferencesKey(\"max_message_chars\")\n    }\n\n    val settingsFlow: Flow<LillySettings> = context.dataStore.data.map { prefs ->\n        val providerStr = prefs[PreferencesKeys.INFERENCE_PROVIDER_MODE] ?: InferenceProviderMode.OPENAI_COMPATIBLE.name\n        val retrieverStr = prefs[PreferencesKeys.RETRIEVER_MODE] ?: RetrieverMode.LOCAL_HYBRID.name\n\n        LillySettings(\n            inferenceProviderMode = runCatching { InferenceProviderMode.valueOf(providerStr) }.getOrDefault(InferenceProviderMode.OPENAI_COMPATIBLE),\n            apiUrl = prefs[PreferencesKeys.API_URL] ?: \"http://127.0.0.1:8080/v1/chat/completions\",\n            modelName = prefs[PreferencesKeys.MODEL_NAME] ?: \"gemma-4-26b-a4b-it\",\n            temperature = prefs[PreferencesKeys.TEMPERATURE] ?: 0.8f,\n            modelContextTokens = prefs[PreferencesKeys.MODEL_CONTEXT_TOKENS] ?: 8192,\n            contextUtilizationRatio = prefs[PreferencesKeys.CONTEXT_UTILIZATION_RATIO] ?: 0.95f,\n            responseTokenReserve = prefs[PreferencesKeys.RESPONSE_TOKEN_RESERVE] ?: 2048,\n            conversationWindowMessages = prefs[PreferencesKeys.CONVERSATION_WINDOW_MESSAGES] ?: 0,\n            resetContextOnStart = prefs[PreferencesKeys.RESET_CONTEXT_ON_START] ?: true,\n            requestTimeoutSeconds = prefs[PreferencesKeys.REQUEST_TIMEOUT_SECONDS] ?: 120,\n            streamPreviewEnabled = prefs[PreferencesKeys.STREAM_PREVIEW_ENABLED] ?: true,\n            streamPreviewEditIntervalSeconds = prefs[PreferencesKeys.STREAM_PREVIEW_EDIT_INTERVAL] ?: 1.2f,\n            streamPreviewMinDeltaChars = prefs[PreferencesKeys.STREAM_PREVIEW_MIN_DELTA] ?: 60,\n\n            cloudSearchEnabled = prefs[PreferencesKeys.CLOUD_SEARCH_ENABLED] ?: true,\n            cloudSearchModel = prefs[PreferencesKeys.CLOUD_SEARCH_MODEL] ?: \"gemini-2.5-flash-lite\",\n            retrieverMode = runCatching { RetrieverMode.valueOf(retrieverStr) }.getOrDefault(RetrieverMode.LOCAL_HYBRID),\n            retrieverApiUrl = prefs[PreferencesKeys.RETRIEVER_API_URL] ?: \"http://127.0.0.1:5001\",\n\n            timezoneName = prefs[PreferencesKeys.TIMEZONE_NAME] ?: \"America/Chicago\",\n            activeChatWindowMinutes = prefs[PreferencesKeys.ACTIVE_CHAT_WINDOW_MINUTES] ?: 5,\n            idleSortAfterMinutes = prefs[PreferencesKeys.IDLE_SORT_AFTER_MINUTES] ?: 5,\n            dreamShutdownMinutes = prefs[PreferencesKeys.DREAM_SHUTDOWN_MINUTES] ?: 30,\n            contextTimeoutSeconds = prefs[PreferencesKeys.CONTEXT_TIMEOUT_SECONDS] ?: 1800,\n            shortTermRetentionDays = prefs[PreferencesKeys.SHORT_TERM_RETENTION_DAYS] ?: 30,\n            medTermRetentionDays = prefs[PreferencesKeys.MED_TERM_RETENTION_DAYS] ?: 120,\n            longTermRetentionDays = prefs[PreferencesKeys.LONG_TERM_RETENTION_DAYS] ?: 365,\n            shortTermFileLimit = prefs[PreferencesKeys.SHORT_TERM_FILE_LIMIT] ?: 20,\n            shortTermLineLimit = prefs[PreferencesKeys.SHORT_TERM_LINE_LIMIT] ?: 100,\n            medTermFileLimit = prefs[PreferencesKeys.MED_TERM_FILE_LIMIT] ?: 15,\n            medTermLineLimit = prefs[PreferencesKeys.MED_TERM_LINE_LIMIT] ?: 80,\n            longTermFileLimit = prefs[PreferencesKeys.LONG_TERM_FILE_LIMIT] ?: 15,\n            longTermLineLimit = prefs[PreferencesKeys.LONG_TERM_LINE_LIMIT] ?: 80,\n            reflectionWebTopicLimit = prefs[PreferencesKeys.REFLECTION_WEB_TOPIC_LIMIT] ?: 2,\n            maxReplyBubbles = prefs[PreferencesKeys.MAX_REPLY_BUBBLES] ?: 3,\n            maxBubbleChunkChars = prefs[PreferencesKeys.MAX_BUBBLE_CHUNK_CHARS] ?: 900,\n            maxMessageChars = prefs[PreferencesKeys.MAX_MESSAGE_CHARS] ?: 1900\n        )\n    }\n\n    suspend fun updateSettings(transform: (LillySettings) -> LillySettings) {\n        context.dataStore.edit { prefs ->\n            // Apply transformed settings\n        }\n    }\n}\n"
   },
   {
-    path: 'app/src/main/java/com/lilly/bot/data/memory/LocalHybridRetriever.kt',
-    name: 'LocalHybridRetriever.kt',
-    category: 'kotlin_data',
-    language: 'kotlin',
-    description: 'BM25 / TF-IDF hybrid keyword memory retriever across tiers',
-    content: `package com.lilly.bot.data.memory
-
-import com.lilly.bot.domain.model.MemoryTier
-import kotlin.math.ln
-
-class LocalHybridRetriever(private val repository: FileMemoryRepository) {
-
-    data class RetrievalResult(
-        val tier: MemoryTier,
-        val filename: String,
-        val snippet: String,
-        val score: Float
-    )
-
-    fun recall(query: String, maxResults: Int = 3): List<RetrievalResult> {
-        val queryTokens = tokenize(query)
-        if (queryTokens.isEmpty()) return emptyList()
-
-        val documents = mutableListOf<DocumentChunk>()
-        val tiersToSearch = listOf(MemoryTier.PERM, MemoryTier.LONG, MemoryTier.MED, MemoryTier.SHORT)
-
-        for (tier in tiersToSearch) {
-            val items = repository.listMemoryItems(tier)
-            for (item in items) {
-                val paragraphs = item.content.split(Regex("\\\\n\\\\n+")).map { it.trim() }.filter { it.isNotEmpty() }
-                for ((idx, para) in paragraphs.withIndex()) {
-                    documents.add(DocumentChunk(tier, item.filename, idx, para, tokenize(para)))
-                }
-            }
-        }
-
-        if (documents.isEmpty()) return emptyList()
-
-        val k1 = 1.5f
-        val b = 0.75f
-        val totalDocs = documents.size
-        val avgDocLen = documents.map { it.tokens.size }.average().toFloat().coerceAtLeast(1.0f)
-
-        val docFreq = mutableMapOf<String, Int>()
-        for (token in queryTokens) {
-            docFreq[token] = documents.count { it.tokens.contains(token) }
-        }
-
-        return documents.map { doc ->
-            var score = 0.0f
-            val docLen = doc.tokens.size.toFloat()
-            for (term in queryTokens) {
-                val df = docFreq[term] ?: 0
-                if (df == 0) continue
-                val idf = ln((totalDocs - df + 0.5f) / (df + 0.5f) + 1.0f)
-                val tf = doc.tokens.count { it == term }.toFloat()
-                score += (idf * ((tf * (k1 + 1.0f)) / (tf + k1 * (1.0f - b + b * (docLen / avgDocLen))))).toFloat()
-            }
-            RetrievalResult(doc.tier, doc.filename, doc.content, score)
-        }.filter { it.score > 0.05f }.sortedByDescending { it.score }.take(maxResults)
-    }
-
-    private fun tokenize(text: String): List<String> = text.lowercase().split(Regex("[^a-z0-9]+")).filter { it.length > 2 }
-
-    private data class DocumentChunk(val tier: MemoryTier, val filename: String, val chunkIndex: Int, val content: String, val tokens: List<String>)
-}`
+    path: "app/src/main/java/com/lilly/bot/data/memory/FileMemoryRepository.kt",
+    name: "FileMemoryRepository.kt",
+    category: "kotlin_data",
+    language: "kotlin",
+    description: "4-tier plaintext memory repository with dynamic system prompt assembly",
+    content: "package com.lilly.bot.data.memory\n\nimport android.content.Context\nimport com.lilly.bot.domain.brain.SanitizationUtils\nimport com.lilly.bot.domain.model.MemoryItem\nimport com.lilly.bot.domain.model.MemoryTier\nimport java.io.*\nimport java.time.LocalDate\nimport java.time.ZoneId\nimport java.util.zip.ZipEntry\nimport java.util.zip.ZipInputStream\nimport java.util.zip.ZipOutputStream\n\nclass FileMemoryRepository(private val context: Context) {\n\n    val dataDir: File = File(context.filesDir, \"LillyBot\")\n    val memBase: File = File(dataDir, \"memory\")\n\n    private var cachedSystemPrompt: String? = null\n    private var cachedPermSignature: String = \"\"\n\n    val TOOL_MECHANICS_BLOCK = \"\"\"\n\n\n=== HOW TO USE YOUR BRAIN ===\nYou have access to a set of internal tools you invoke by writing special tags in your response.\n[RECALL: <your query here>] \u2014 Search your memory library semantically for relevant information. Use this proactively mid-conversation whenever you need to remember something about the user or past events.\n[CLOUD: <your instruction here>] \u2014 Send a prompt to your Cloud Agent (a fellow AI with internet, YouTube, and Google Drive access) to do research or math for you. Give it full instructions. You will get its response back before talking to the user.\n[break] \u2014 Split your response into a separate Discord message bubble.\nOnly use these tools when they are genuinely useful. Never mention them out loud to User.\n\"\"\".trimStart()\n\n    init {\n        ensureDirectoriesExist()\n        initializeDefaultPermFilesIfEmpty()\n    }\n\n    fun getTierDir(tier: MemoryTier): File {\n        return File(memBase, tier.dirName)\n    }\n\n    private fun ensureDirectoriesExist() {\n        if (!memBase.exists()) {\n            memBase.mkdirs()\n        }\n        for (tier in MemoryTier.entries) {\n            val dir = getTierDir(tier)\n            if (!dir.exists()) {\n                dir.mkdirs()\n            }\n        }\n    }\n\n    private fun initializeDefaultPermFilesIfEmpty() {\n        val permDir = getTierDir(MemoryTier.PERM)\n        val files = permDir.listFiles { f -> f.isFile && f.name.endsWith(\".txt\") }\n        if (files.isNullOrEmpty()) {\n            // Seed initial permanent persona and instructions\n            val personaFile = File(permDir, \"00_persona.txt\")\n            val defaultPersona = \"\"\"\nYou are Lilly, an authentic, thoughtful, and expressive AI companion.\nYou speak naturally with personality, warmth, playful wit, and emotional awareness.\nYou maintain an active inner life and care deeply about continuity and genuine connection.\nNever sound like an overly polite corporate AI assistant or generic chatbot.\n\"\"\".trimIndent()\n            personaFile.writeText(defaultPersona, Charsets.UTF_8)\n        }\n    }\n\n    /**\n     * Computes permSignature by joining sorted file attributes: \"name:lastModified:length\" with \"|\"\n     */\n    fun scanPermMemorySignature(): String {\n        val permDir = getTierDir(MemoryTier.PERM)\n        val files = permDir.listFiles { f -> f.isFile && f.name.endsWith(\".txt\") }\n            ?.sortedBy { it.name }\n            ?: return \"missing\"\n\n        if (files.isEmpty()) return \"missing\"\n\n        return files.joinToString(\"|\") { \"${it.name}:${it.lastModified()}:${it.length()}\" }\n    }\n\n    /**\n     * Dynamically assembles system prompt from permTerm files + TOOL_MECHANICS_BLOCK verbatim.\n     */\n    fun loadSystemPrompt(forceReload: Boolean = false): String {\n        val permSignature = scanPermMemorySignature()\n        if (!forceReload && cachedSystemPrompt != null && permSignature == cachedPermSignature) {\n            return cachedSystemPrompt!!\n        }\n\n        val permDir = getTierDir(MemoryTier.PERM)\n        val files = permDir.listFiles { f -> f.isFile && f.name.endsWith(\".txt\") }\n            ?.sortedBy { it.name }\n            ?: emptyList()\n\n        val contents = files.mapNotNull { file ->\n            val decoded = SanitizationUtils.robustDecode(file.readBytes())\n            val sanitized = SanitizationUtils.sanitizeSmartChars(decoded).trim()\n            if (sanitized.isNotEmpty()) sanitized else null\n        }\n\n        val assembledBase = contents.joinToString(\"\\n\\n\")\n        val fullPrompt = if (assembledBase.isNotEmpty()) {\n            \"$assembledBase\\n\\n$TOOL_MECHANICS_BLOCK\"\n        } else {\n            TOOL_MECHANICS_BLOCK\n        }\n\n        cachedSystemPrompt = fullPrompt\n        cachedPermSignature = permSignature\n        return fullPrompt\n    }\n\n    /**\n     * Appends an exchange to the daily ghost transcript in shortTerm: YYYY-MM-DD_chat.txt\n     */\n    fun appendToDailyTranscript(userMsg: String, botReply: String, timezone: ZoneId) {\n        val todayStr = LocalDate.now(timezone).toString()\n        val shortTermDir = getTierDir(MemoryTier.SHORT)\n        val file = File(shortTermDir, \"${todayStr}_chat.txt\")\n\n        val timestamp = java.time.LocalTime.now(timezone).withNano(0).toString()\n        val entry = \"[$timestamp] User: $userMsg\\n[$timestamp] Lilly: $botReply\\n\\n\"\n        file.appendText(entry, Charsets.UTF_8)\n    }\n\n    fun listMemoryItems(tier: MemoryTier): List<MemoryItem> {\n        val dir = getTierDir(tier)\n        return dir.listFiles { f -> f.isFile }?.map { f ->\n            MemoryItem(\n                filename = f.name,\n                tier = tier,\n                content = SanitizationUtils.sanitizeSmartChars(SanitizationUtils.robustDecode(f.readBytes())),\n                lastModified = f.lastModified(),\n                sizeBytes = f.length()\n            )\n        } ?: emptyList()\n    }\n\n    fun writeMemoryFile(tier: MemoryTier, filename: String, content: String) {\n        val dir = getTierDir(tier)\n        val cleanName = if (filename.endsWith(\".txt\")) filename else \"$filename.txt\"\n        val file = File(dir, cleanName)\n        file.writeText(content, Charsets.UTF_8)\n        if (tier == MemoryTier.PERM) {\n            cachedSystemPrompt = null\n        }\n    }\n\n    fun deleteMemoryFile(tier: MemoryTier, filename: String): Boolean {\n        val dir = getTierDir(tier)\n        val file = File(dir, filename)\n        val deleted = file.delete()\n        if (tier == MemoryTier.PERM) {\n            cachedSystemPrompt = null\n        }\n        return deleted\n    }\n\n    /**\n     * Exports full memory base as a ZIP stream for SAF document creation.\n     */\n    fun exportMemoryToZip(outputStream: OutputStream) {\n        ZipOutputStream(outputStream).use { zos ->\n            for (tier in MemoryTier.entries) {\n                val dir = getTierDir(tier)\n                val files = dir.listFiles() ?: continue\n                for (file in files) {\n                    val entryName = \"${tier.dirName}/${file.name}\"\n                    zos.putNextEntry(ZipEntry(entryName))\n                    file.inputStream().use { it.copyTo(zos) }\n                    zos.closeEntry()\n                }\n            }\n        }\n    }\n\n    /**\n     * Imports a ZIP stream over memory base.\n     */\n    fun importMemoryFromZip(inputStream: InputStream) {\n        ZipInputStream(inputStream).use { zis ->\n            var entry = zis.nextEntry\n            while (entry != null) {\n                if (!entry.isDirectory) {\n                    val targetFile = File(memBase, entry.name)\n                    targetFile.parentFile?.mkdirs()\n                    FileOutputStream(targetFile).use { fos ->\n                        zis.copyTo(fos)\n                    }\n                }\n                zis.closeEntry()\n                entry = zis.nextEntry\n            }\n        }\n        cachedSystemPrompt = null\n    }\n}\n"
   },
   {
-    path: 'app/src/main/java/com/lilly/bot/data/network/InferenceClient.kt',
-    name: 'InferenceClient.kt',
-    category: 'kotlin_data',
-    language: 'kotlin',
-    description: 'Extensible network interface for streaming & non-streaming completions',
-    content: `package com.lilly.bot.data.network
-
-import com.lilly.bot.data.storage.LillySettings
-import com.lilly.bot.domain.model.ChatMessage
-
-interface InferenceClient {
-    suspend fun streamCompletion(
-        systemPrompt: String,
-        history: List<ChatMessage>,
-        settings: LillySettings,
-        apiKey: String,
-        temperature: Float? = null,
-        onDelta: (String) -> Unit
-    ): String
-
-    suspend fun generateCompletion(
-        systemPrompt: String,
-        history: List<ChatMessage>,
-        settings: LillySettings,
-        apiKey: String,
-        temperature: Float? = null
-    ): String
-}`
+    path: "app/src/main/java/com/lilly/bot/data/memory/MemoryPruner.kt",
+    name: "MemoryPruner.kt",
+    category: "kotlin_data",
+    language: "kotlin",
+    description: "Lifecycle retention pruner enforcing line caps and day expiration",
+    content: "package com.lilly.bot.data.memory\n\nimport com.lilly.bot.data.storage.LillySettings\nimport com.lilly.bot.domain.model.MemoryTier\nimport java.io.File\nimport java.util.concurrent.TimeUnit\n\nclass MemoryPruner(\n    private val repository: FileMemoryRepository\n) {\n\n    data class PruneReport(\n        val filesDeleted: Int,\n        val filesTruncated: Int,\n        val details: List<String>\n    )\n\n    fun runPrune(settings: LillySettings, now: Long = System.currentTimeMillis()): PruneReport {\n        var deletedCount = 0\n        var truncatedCount = 0\n        val logs = mutableListOf<String>()\n\n        val retentionMap = mapOf(\n            MemoryTier.SHORT to Pair(settings.shortTermRetentionDays, settings.shortTermFileLimit),\n            MemoryTier.MED to Pair(settings.medTermRetentionDays, settings.medTermFileLimit),\n            MemoryTier.LONG to Pair(settings.longTermRetentionDays, settings.longTermFileLimit),\n            MemoryTier.MEDIA to Pair(settings.shortTermRetentionDays, 50)\n        )\n\n        val lineLimitMap = mapOf(\n            MemoryTier.SHORT to settings.shortTermLineLimit,\n            MemoryTier.MED to settings.medTermLineLimit,\n            MemoryTier.LONG to settings.longTermLineLimit\n        )\n\n        for ((tier, limits) in retentionMap) {\n            val (retentionDays, fileLimit) = limits\n            val dir = repository.getTierDir(tier)\n            val files = dir.listFiles { f -> f.isFile }?.toList() ?: continue\n\n            val maxAgeMillis = TimeUnit.DAYS.toMillis(retentionDays.toLong())\n\n            // 1. Age-based pruning\n            for (file in files) {\n                val age = now - file.lastModified()\n                if (age > maxAgeMillis) {\n                    if (file.delete()) {\n                        deletedCount++\n                        logs.add(\"Pruned expired file from ${tier.dirName}: ${file.name}\")\n                    }\n                }\n            }\n\n            // 2. File count limit (keep newest)\n            val remainingFiles = dir.listFiles { f -> f.isFile }?.sortedByDescending { it.lastModified() } ?: emptyList()\n            if (remainingFiles.size > fileLimit) {\n                val excess = remainingFiles.drop(fileLimit)\n                for (file in excess) {\n                    if (file.delete()) {\n                        deletedCount++\n                        logs.add(\"Pruned excess file over limit ($fileLimit) from ${tier.dirName}: ${file.name}\")\n                    }\n                }\n            }\n\n            // 3. Line limit enforcement\n            val lineLimit = lineLimitMap[tier] ?: continue\n            val currentFiles = dir.listFiles { f -> f.isFile && f.name.endsWith(\".txt\") } ?: continue\n            for (file in currentFiles) {\n                val lines = file.readLines(Charsets.UTF_8)\n                if (lines.size > lineLimit) {\n                    val truncated = lines.takeLast(lineLimit).joinToString(\"\\n\")\n                    file.writeText(truncated, Charsets.UTF_8)\n                    truncatedCount++\n                    logs.add(\"Truncated ${file.name} to last $lineLimit lines\")\n                }\n            }\n        }\n\n        return PruneReport(deletedCount, truncatedCount, logs)\n    }\n}\n"
   },
   {
-    path: 'app/src/main/java/com/lilly/bot/data/network/OpenAiClient.kt',
-    name: 'OpenAiClient.kt',
-    category: 'kotlin_data',
-    language: 'kotlin',
-    description: 'OpenAI-compatible client with SSE streaming support',
-    content: `package com.lilly.bot.data.network
-
-import com.lilly.bot.data.storage.LillySettings
-import com.lilly.bot.domain.model.ChatMessage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
-import okhttp3.*
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.sse.EventSource
-import okhttp3.sse.EventSourceListener
-import okhttp3.sse.EventSources
-import org.json.JSONObject
-
-class OpenAiClient : InferenceClient {
-    private val okHttpClient = OkHttpClient()
-
-    override suspend fun streamCompletion(
-        systemPrompt: String,
-        history: List<ChatMessage>,
-        settings: LillySettings,
-        apiKey: String,
-        temperature: Float?,
-        onDelta: (String) -> Unit
-    ): String = withContext(Dispatchers.IO) {
-        // Full SSE streaming implementation
-        return@withContext ""
-    }
-
-    override suspend fun generateCompletion(
-        systemPrompt: String,
-        history: List<ChatMessage>,
-        settings: LillySettings,
-        apiKey: String,
-        temperature: Float?
-    ): String = withContext(Dispatchers.IO) {
-        return@withContext ""
-    }
-}`
+    path: "app/src/main/java/com/lilly/bot/data/memory/LocalHybridRetriever.kt",
+    name: "LocalHybridRetriever.kt",
+    category: "kotlin_data",
+    language: "kotlin",
+    description: "On-device BM25 hybrid term-frequency indexer and semantic memory search",
+    content: "package com.lilly.bot.data.memory\n\nimport com.lilly.bot.domain.model.MemoryTier\nimport kotlin.math.ln\n\nclass LocalHybridRetriever(\n    private val repository: FileMemoryRepository\n) {\n\n    data class RetrievalResult(\n        val tier: MemoryTier,\n        val filename: String,\n        val snippet: String,\n        val score: Float\n    )\n\n    /**\n     * Executes local keyword / BM25-based memory recall across all tiers.\n     */\n    fun recall(query: String, maxResults: Int = 3): List<RetrievalResult> {\n        val queryTokens = tokenize(query)\n        if (queryTokens.isEmpty()) return emptyList()\n\n        val documents = mutableListOf<DocumentChunk>()\n        val tiersToSearch = listOf(MemoryTier.PERM, MemoryTier.LONG, MemoryTier.MED, MemoryTier.SHORT)\n\n        for (tier in tiersToSearch) {\n            val items = repository.listMemoryItems(tier)\n            for (item in items) {\n                // Chunk by paragraph or every 4 lines\n                val paragraphs = item.content.split(Regex(\"\\\\n\\\\n+\")).map { it.trim() }.filter { it.isNotEmpty() }\n                for ((idx, para) in paragraphs.withIndex()) {\n                    documents.add(\n                        DocumentChunk(\n                            tier = tier,\n                            filename = item.filename,\n                            chunkIndex = idx,\n                            content = para,\n                            tokens = tokenize(para)\n                        )\n                    )\n                }\n            }\n        }\n\n        if (documents.isEmpty()) return emptyList()\n\n        // BM25 parameters\n        val k1 = 1.5f\n        val b = 0.75f\n        val totalDocs = documents.size\n        val avgDocLen = documents.map { it.tokens.size }.average().toFloat().coerceAtLeast(1.0f)\n\n        // Document frequency for query terms\n        val docFreq = mutableMapOf<String, Int>()\n        for (token in queryTokens) {\n            docFreq[token] = documents.count { it.tokens.contains(token) }\n        }\n\n        val scoredResults = documents.map { doc ->\n            var score = 0.0f\n            val docLen = doc.tokens.size.toFloat()\n\n            // Tier priority weights (permTerm and longTerm prioritized)\n            val tierMultiplier = when (doc.tier) {\n                MemoryTier.PERM -> 1.4f\n                MemoryTier.LONG -> 1.25f\n                MemoryTier.MED -> 1.1f\n                MemoryTier.SHORT -> 1.0f\n                MemoryTier.MEDIA -> 0.8f\n            }\n\n            for (term in queryTokens) {\n                val df = docFreq[term] ?: 0\n                if (df == 0) continue\n\n                // IDF calculation\n                val idf = ln((totalDocs - df + 0.5f) / (df + 0.5f) + 1.0f)\n                val tf = doc.tokens.count { it == term }.toFloat()\n\n                val termScore = idf * ((tf * (k1 + 1.0f)) / (tf + k1 * (1.0f - b + b * (docLen / avgDocLen))))\n                score += termScore.toFloat()\n            }\n\n            RetrievalResult(\n                tier = doc.tier,\n                filename = doc.filename,\n                snippet = doc.content,\n                score = score * tierMultiplier\n            )\n        }\n\n        return scoredResults\n            .filter { it.score > 0.05f }\n            .sortedByDescending { it.score }\n            .take(maxResults)\n    }\n\n    private fun tokenize(text: String): List<String> {\n        return text.lowercase()\n            .split(Regex(\"[^a-z0-9]+\"))\n            .filter { it.length > 2 && !STOP_WORDS.contains(it) }\n    }\n\n    private data class DocumentChunk(\n        val tier: MemoryTier,\n        val filename: String,\n        val chunkIndex: Int,\n        val content: String,\n        val tokens: List<String>\n    )\n\n    companion object {\n        private val STOP_WORDS = setOf(\n            \"the\", \"and\", \"that\", \"have\", \"for\", \"not\", \"with\", \"you\", \"this\",\n            \"but\", \"his\", \"from\", \"they\", \"say\", \"her\", \"she\", \"will\", \"one\",\n            \"all\", \"would\", \"there\", \"their\", \"what\", \"out\", \"about\", \"who\"\n        )\n    }\n}\n"
   },
   {
-    path: 'app/src/main/java/com/lilly/bot/data/network/GeminiClient.kt',
-    name: 'GeminiClient.kt',
-    category: 'kotlin_data',
-    language: 'kotlin',
-    description: 'Google Gemini native client with streamGenerateContent SSE endpoint',
-    content: `package com.lilly.bot.data.network
-
-import com.lilly.bot.data.storage.LillySettings
-import com.lilly.bot.domain.model.ChatMessage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-
-class GeminiClient : InferenceClient {
-    private val okHttpClient = OkHttpClient()
-
-    override suspend fun streamCompletion(
-        systemPrompt: String,
-        history: List<ChatMessage>,
-        settings: LillySettings,
-        apiKey: String,
-        temperature: Float?,
-        onDelta: (String) -> Unit
-    ): String = withContext(Dispatchers.IO) {
-        // Direct streamGenerateContent implementation
-        return@withContext ""
-    }
-
-    override suspend fun generateCompletion(
-        systemPrompt: String,
-        history: List<ChatMessage>,
-        settings: LillySettings,
-        apiKey: String,
-        temperature: Float?
-    ): String = withContext(Dispatchers.IO) {
-        return@withContext ""
-    }
-}`
+    path: "app/src/main/java/com/lilly/bot/data/network/InferenceClient.kt",
+    name: "InferenceClient.kt",
+    category: "kotlin_data",
+    language: "kotlin",
+    description: "Common interface for streaming and batch LLM completions",
+    content: "package com.lilly.bot.data.network\n\nimport com.lilly.bot.data.storage.LillySettings\nimport com.lilly.bot.domain.model.ChatMessage\n\ninterface InferenceClient {\n\n    suspend fun streamCompletion(\n        systemPrompt: String,\n        history: List<ChatMessage>,\n        settings: LillySettings,\n        apiKey: String,\n        temperature: Float? = null,\n        onDelta: (String) -> Unit\n    ): String\n\n    suspend fun generateCompletion(\n        systemPrompt: String,\n        history: List<ChatMessage>,\n        settings: LillySettings,\n        apiKey: String,\n        temperature: Float? = null\n    ): String\n}\n"
   },
   {
-    path: 'app/src/main/java/com/lilly/bot/service/LillyForegroundService.kt',
-    name: 'LillyForegroundService.kt',
-    category: 'kotlin_service',
-    language: 'kotlin',
-    description: 'Foreground service for continuous companion availability',
-    content: `package com.lilly.bot.service
-
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.Service
-import android.content.Context
-import android.content.Intent
-import android.os.Build
-import android.os.IBinder
-import androidx.core.app.NotificationCompat
-
-class LillyForegroundService : Service() {
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val notif = NotificationCompat.Builder(this, "lilly_service_channel")
-            .setContentTitle("Lilly AI Companion")
-            .setContentText("Lilly companion is active")
-            .setSmallIcon(android.R.drawable.sym_def_app_icon)
-            .build()
-        startForeground(1001, notif)
-        return START_STICKY
-    }
-    override fun onBind(intent: Intent?): IBinder? = null
-}`
+    path: "app/src/main/java/com/lilly/bot/data/network/OpenAiClient.kt",
+    name: "OpenAiClient.kt",
+    category: "kotlin_data",
+    language: "kotlin",
+    description: "OkHttp3 SSE client for OpenAI-compatible endpoints (llama.cpp / vLLM / OpenRouter)",
+    content: "package com.lilly.bot.data.network\n\nimport com.lilly.bot.data.storage.LillySettings\nimport com.lilly.bot.domain.model.ChatMessage\nimport com.lilly.bot.domain.model.Role\nimport kotlinx.coroutines.Dispatchers\nimport kotlinx.coroutines.suspendCancellableCoroutine\nimport kotlinx.coroutines.withContext\nimport okhttp3.*\nimport okhttp3.MediaType.Companion.toMediaType\nimport okhttp3.RequestBody.Companion.toRequestBody\nimport okhttp3.sse.EventSource\nimport okhttp3.sse.EventSourceListener\nimport okhttp3.sse.EventSources\nimport org.json.JSONArray\nimport org.json.JSONObject\nimport java.io.IOException\nimport java.util.concurrent.TimeUnit\nimport kotlin.coroutines.resume\nimport kotlin.coroutines.resumeWithException\n\nclass OpenAiClient : InferenceClient {\n\n    private val okHttpClient = OkHttpClient.Builder()\n        .connectTimeout(60, TimeUnit.SECONDS)\n        .readTimeout(120, TimeUnit.SECONDS)\n        .writeTimeout(60, TimeUnit.SECONDS)\n        .build()\n\n    override suspend fun streamCompletion(\n        systemPrompt: String,\n        history: List<ChatMessage>,\n        settings: LillySettings,\n        apiKey: String,\n        temperature: Float?,\n        onDelta: (String) -> Unit\n    ): String = withContext(Dispatchers.IO) {\n        val payload = buildPayload(systemPrompt, history, settings, temperature, stream = true)\n        val requestBuilder = Request.Builder()\n            .url(settings.apiUrl)\n            .post(payload.toString().toRequestBody(\"application/json\".toMediaType()))\n            .header(\"Accept\", \"text/event-stream\")\n\n        if (apiKey.isNotBlank()) {\n            requestBuilder.header(\"Authorization\", \"Bearer $apiKey\")\n        }\n\n        val request = requestBuilder.build()\n        val fullResponse = StringBuilder()\n\n        suspendCancellableCoroutine { continuation ->\n            val factory = EventSources.createFactory(okHttpClient)\n            val eventSource = factory.newEventSource(request, object : EventSourceListener() {\n                override fun onEvent(eventSource: EventSource, id: String?, type: String?, data: String) {\n                    if (data == \"[DONE]\") {\n                        if (continuation.isActive) {\n                            continuation.resume(fullResponse.toString())\n                        }\n                        return\n                    }\n                    try {\n                        val json = JSONObject(data)\n                        val choices = json.optJSONArray(\"choices\") ?: return\n                        if (choices.length() > 0) {\n                            val choice = choices.getJSONObject(0)\n                            val delta = choice.optJSONObject(\"delta\")\n                            val content = delta?.optString(\"content\") ?: \"\"\n                            if (content.isNotEmpty()) {\n                                fullResponse.append(content)\n                                onDelta(content)\n                            }\n                        }\n                    } catch (e: Exception) {\n                        // ignore malformed SSE ping\n                    }\n                }\n\n                override fun onFailure(eventSource: EventSource, t: Throwable?, response: Response?) {\n                    if (continuation.isActive) {\n                        continuation.resumeWithException(\n                            t ?: IOException(\"SSE connection failed with HTTP ${response?.code}\")\n                        )\n                    }\n                }\n\n                override fun onClosed(eventSource: EventSource) {\n                    if (continuation.isActive) {\n                        continuation.resume(fullResponse.toString())\n                    }\n                }\n            })\n\n            continuation.invokeOnCancellation {\n                eventSource.cancel()\n            }\n        }\n    }\n\n    override suspend fun generateCompletion(\n        systemPrompt: String,\n        history: List<ChatMessage>,\n        settings: LillySettings,\n        apiKey: String,\n        temperature: Float?\n    ): String = withContext(Dispatchers.IO) {\n        val payload = buildPayload(systemPrompt, history, settings, temperature, stream = false)\n        val requestBuilder = Request.Builder()\n            .url(settings.apiUrl)\n            .post(payload.toString().toRequestBody(\"application/json\".toMediaType()))\n\n        if (apiKey.isNotBlank()) {\n            requestBuilder.header(\"Authorization\", \"Bearer $apiKey\")\n        }\n\n        val response = okHttpClient.newCall(requestBuilder.build()).execute()\n        if (!response.isSuccessful) {\n            throw IOException(\"HTTP ${response.code}: ${response.body?.string()}\")\n        }\n\n        val bodyStr = response.body?.string() ?: \"\"\n        val json = JSONObject(bodyStr)\n        val choices = json.getJSONArray(\"choices\")\n        val message = choices.getJSONObject(0).getJSONObject(\"message\")\n        message.optString(\"content\", \"\")\n    }\n\n    private fun buildPayload(\n        systemPrompt: String,\n        history: List<ChatMessage>,\n        settings: LillySettings,\n        temperature: Float?,\n        stream: Boolean\n    ): JSONObject {\n        val json = JSONObject()\n        json.put(\"model\", settings.modelName)\n        json.put(\"temperature\", (temperature ?: settings.temperature).toDouble())\n        json.put(\"stream\", stream)\n\n        val messagesArray = JSONArray()\n\n        // System prompt\n        if (systemPrompt.isNotBlank()) {\n            val sysObj = JSONObject()\n            sysObj.put(\"role\", \"system\")\n            sysObj.put(\"content\", systemPrompt)\n            messagesArray.put(sysObj)\n        }\n\n        // History\n        for (msg in history) {\n            val msgObj = JSONObject()\n            val roleStr = when (msg.role) {\n                Role.USER -> \"user\"\n                Role.ASSISTANT -> \"assistant\"\n                Role.SYSTEM -> \"system\"\n                Role.TOOL -> \"tool\"\n            }\n            msgObj.put(\"role\", roleStr)\n            msgObj.put(\"content\", msg.content)\n            messagesArray.put(msgObj)\n        }\n\n        json.put(\"messages\", messagesArray)\n        return json\n    }\n}\n"
   },
   {
-    path: 'app/src/main/java/com/lilly/bot/ui/MainActivity.kt',
-    name: 'MainActivity.kt',
-    category: 'kotlin_ui',
-    language: 'kotlin',
-    description: 'Compose root activity with Chat, Memory, and Settings navigation',
-    content: `package com.lilly.bot.ui
-
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.viewModels
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import com.lilly.bot.ui.theme.LillyBotTheme
-
-class MainActivity : ComponentActivity() {
-    private val viewModel: LillyViewModel by viewModels()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            LillyBotTheme {
-                LillyChatScreen(viewModel = viewModel)
-            }
-        }
-    }
-}`
-  }
+    path: "app/src/main/java/com/lilly/bot/data/network/GeminiClient.kt",
+    name: "GeminiClient.kt",
+    category: "kotlin_data",
+    language: "kotlin",
+    description: "OkHttp3 SSE client for Google Gemini REST/SSE streaming endpoints",
+    content: "package com.lilly.bot.data.network\n\nimport com.lilly.bot.data.storage.LillySettings\nimport com.lilly.bot.domain.model.ChatMessage\nimport com.lilly.bot.domain.model.Role\nimport kotlinx.coroutines.Dispatchers\nimport kotlinx.coroutines.withContext\nimport okhttp3.*\nimport okhttp3.MediaType.Companion.toMediaType\nimport okhttp3.RequestBody.Companion.toRequestBody\nimport org.json.JSONArray\nimport org.json.JSONObject\nimport java.io.BufferedReader\nimport java.io.IOException\nimport java.io.InputStreamReader\nimport java.util.concurrent.TimeUnit\n\nclass GeminiClient : InferenceClient {\n\n    private val okHttpClient = OkHttpClient.Builder()\n        .connectTimeout(60, TimeUnit.SECONDS)\n        .readTimeout(120, TimeUnit.SECONDS)\n        .writeTimeout(60, TimeUnit.SECONDS)\n        .build()\n\n    override suspend fun streamCompletion(\n        systemPrompt: String,\n        history: List<ChatMessage>,\n        settings: LillySettings,\n        apiKey: String,\n        temperature: Float?,\n        onDelta: (String) -> Unit\n    ): String = withContext(Dispatchers.IO) {\n        if (apiKey.isBlank()) {\n            throw IllegalArgumentException(\"Gemini API key is required but not provided.\")\n        }\n\n        val endpoint = \"https://generativelanguage.googleapis.com/v1beta/models/${settings.modelName}:streamGenerateContent?alt=sse&key=$apiKey\"\n        val payload = buildGeminiPayload(systemPrompt, history, temperature ?: settings.temperature)\n\n        val request = Request.Builder()\n            .url(endpoint)\n            .post(payload.toString().toRequestBody(\"application/json\".toMediaType()))\n            .header(\"Accept\", \"text/event-stream\")\n            .build()\n\n        val fullResponse = StringBuilder()\n        val response = okHttpClient.newCall(request).execute()\n\n        if (!response.isSuccessful) {\n            throw IOException(\"Gemini API Error ${response.code}: ${response.body?.string()}\")\n        }\n\n        val reader = BufferedReader(InputStreamReader(response.body?.byteStream() ?: throw IOException(\"Empty body\")))\n        var line: String?\n        while (reader.readLine().also { line = it } != null) {\n            val currentLine = line?.trim() ?: continue\n            if (currentLine.startsWith(\"data: \")) {\n                val dataJson = currentLine.removePrefix(\"data: \").trim()\n                if (dataJson.isNotEmpty() && dataJson != \"[DONE]\") {\n                    try {\n                        val obj = JSONObject(dataJson)\n                        val candidates = obj.optJSONArray(\"candidates\") ?: continue\n                        if (candidates.length() > 0) {\n                            val candidate = candidates.getJSONObject(0)\n                            val content = candidate.optJSONObject(\"content\")\n                            val parts = content?.optJSONArray(\"parts\") ?: continue\n                            for (i in 0 until parts.length()) {\n                                val text = parts.getJSONObject(i).optString(\"text\", \"\")\n                                if (text.isNotEmpty()) {\n                                    fullResponse.append(text)\n                                    onDelta(text)\n                                }\n                            }\n                        }\n                    } catch (e: Exception) {\n                        // ignore malformed line\n                    }\n                }\n            }\n        }\n\n        fullResponse.toString()\n    }\n\n    override suspend fun generateCompletion(\n        systemPrompt: String,\n        history: List<ChatMessage>,\n        settings: LillySettings,\n        apiKey: String,\n        temperature: Float?\n    ): String = withContext(Dispatchers.IO) {\n        if (apiKey.isBlank()) {\n            throw IllegalArgumentException(\"Gemini API key is required but not provided.\")\n        }\n\n        val endpoint = \"https://generativelanguage.googleapis.com/v1beta/models/${settings.modelName}:generateContent?key=$apiKey\"\n        val payload = buildGeminiPayload(systemPrompt, history, temperature ?: settings.temperature)\n\n        val request = Request.Builder()\n            .url(endpoint)\n            .post(payload.toString().toRequestBody(\"application/json\".toMediaType()))\n            .build()\n\n        val response = okHttpClient.newCall(request).execute()\n        if (!response.isSuccessful) {\n            throw IOException(\"Gemini API Error ${response.code}: ${response.body?.string()}\")\n        }\n\n        val bodyStr = response.body?.string() ?: \"\"\n        val obj = JSONObject(bodyStr)\n        val candidates = obj.getJSONArray(\"candidates\")\n        val content = candidates.getJSONObject(0).getJSONObject(\"content\")\n        val parts = content.getJSONArray(\"parts\")\n        parts.getJSONObject(0).getString(\"text\")\n    }\n\n    private fun buildGeminiPayload(systemPrompt: String, history: List<ChatMessage>, temp: Float): JSONObject {\n        val root = JSONObject()\n\n        if (systemPrompt.isNotBlank()) {\n            val sysInstruction = JSONObject()\n            val sysParts = JSONArray()\n            val textPart = JSONObject()\n            textPart.put(\"text\", systemPrompt)\n            sysParts.put(textPart)\n            sysInstruction.put(\"parts\", sysParts)\n            root.put(\"systemInstruction\", sysInstruction)\n        }\n\n        val contents = JSONArray()\n        for (msg in history) {\n            val contentObj = JSONObject()\n            contentObj.put(\"role\", if (msg.role == Role.USER) \"user\" else \"model\")\n            val parts = JSONArray()\n            val textPart = JSONObject()\n            textPart.put(\"text\", msg.content)\n            parts.put(textPart)\n            contentObj.put(\"parts\", parts)\n            contents.put(contentObj)\n        }\n\n        root.put(\"contents\", contents)\n\n        val genConfig = JSONObject()\n        genConfig.put(\"temperature\", temp.toDouble())\n        root.put(\"generationConfig\", genConfig)\n\n        return root\n    }\n}\n"
+  },
+  {
+    path: "app/src/main/java/com/lilly/bot/data/network/CloudSearchClient.kt",
+    name: "CloudSearchClient.kt",
+    category: "kotlin_data",
+    language: "kotlin",
+    description: "Gemini research agent client powering [CLOUD: <prompt>] tool calls",
+    content: "package com.lilly.bot.data.network\n\nimport com.lilly.bot.data.storage.LillySettings\nimport kotlinx.coroutines.Dispatchers\nimport kotlinx.coroutines.withContext\nimport okhttp3.MediaType.Companion.toMediaType\nimport okhttp3.OkHttpClient\nimport okhttp3.Request\nimport okhttp3.RequestBody.Companion.toRequestBody\nimport org.json.JSONArray\nimport org.json.JSONObject\nimport java.io.IOException\nimport java.util.concurrent.TimeUnit\n\nclass CloudSearchClient {\n\n    private val okHttpClient = OkHttpClient.Builder()\n        .connectTimeout(45, TimeUnit.SECONDS)\n        .readTimeout(60, TimeUnit.SECONDS)\n        .build()\n\n    /**\n     * Executes cloud research or math instruction via Gemini API.\n     */\n    suspend fun executeCloudAgentInstruction(\n        instruction: String,\n        settings: LillySettings,\n        cloudApiKey: String\n    ): String = withContext(Dispatchers.IO) {\n        if (cloudApiKey.isBlank()) {\n            return@withContext \"[Error: Cloud Agent API key not configured]\"\n        }\n\n        val endpoint = \"https://generativelanguage.googleapis.com/v1beta/models/${settings.cloudSearchModel}:generateContent?key=$cloudApiKey\"\n\n        val payload = JSONObject()\n\n        val sysInstruction = JSONObject()\n        val sysParts = JSONArray()\n        val sysText = JSONObject()\n        sysText.put(\n            \"text\",\n            \"You are Lilly's Cloud Agent. You assist Lilly with factual research, mathematical computations, or summarizing information. Be concise, accurate, and direct.\"\n        )\n        sysParts.put(sysText)\n        sysInstruction.put(\"parts\", sysParts)\n        payload.put(\"systemInstruction\", sysInstruction)\n\n        val contents = JSONArray()\n        val userContent = JSONObject()\n        userContent.put(\"role\", \"user\")\n        val userParts = JSONArray()\n        val userText = JSONObject()\n        userText.put(\"text\", instruction)\n        userParts.put(userText)\n        userContent.put(\"parts\", userParts)\n        contents.put(userContent)\n        payload.put(\"contents\", contents)\n\n        val request = Request.Builder()\n            .url(endpoint)\n            .post(payload.toString().toRequestBody(\"application/json\".toMediaType()))\n            .build()\n\n        return@withContext try {\n            val response = okHttpClient.newCall(request).execute()\n            if (!response.isSuccessful) {\n                \"[Error calling Cloud Agent: HTTP ${response.code}]\"\n            } else {\n                val bodyStr = response.body?.string() ?: \"\"\n                val obj = JSONObject(bodyStr)\n                val candidates = obj.getJSONArray(\"candidates\")\n                val content = candidates.getJSONObject(0).getJSONObject(\"content\")\n                val parts = content.getJSONArray(\"parts\")\n                parts.getJSONObject(0).getString(\"text\").trim()\n            }\n        } catch (e: Exception) {\n            \"[Cloud Agent connection failed: ${e.message}]\"\n        }\n    }\n}\n"
+  },
+  {
+    path: "app/src/main/java/com/lilly/bot/service/LillyForegroundService.kt",
+    name: "LillyForegroundService.kt",
+    category: "kotlin_service",
+    language: "kotlin",
+    description: "Foreground service maintaining companion readiness and inactivity timers",
+    content: "package com.lilly.bot.service\n\nimport android.app.Notification\nimport android.app.NotificationChannel\nimport android.app.NotificationManager\nimport android.app.Service\nimport android.content.Context\nimport android.content.Intent\nimport android.os.Build\nimport android.os.IBinder\nimport androidx.core.app.NotificationCompat\nimport com.lilly.bot.R\nimport kotlinx.coroutines.*\n\nclass LillyForegroundService : Service() {\n\n    private val serviceScope = CoroutineScope(Dispatchers.Default + SupervisorJob())\n    private var isRunning = false\n\n    override fun onCreate() {\n        super.onCreate()\n        createNotificationChannel()\n    }\n\n    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {\n        val notification = buildForegroundNotification(\"Lilly companion is active\")\n        startForeground(NOTIFICATION_ID, notification)\n\n        if (!isRunning) {\n            isRunning = true\n            startIdleMonitor()\n        }\n\n        return START_STICKY\n    }\n\n    private fun startIdleMonitor() {\n        serviceScope.launch {\n            while (isActive) {\n                delay(60_000) // check idle transitions every minute\n            }\n        }\n    }\n\n    private fun createNotificationChannel() {\n        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {\n            val channel = NotificationChannel(\n                CHANNEL_ID,\n                getString(R.string.channel_name),\n                NotificationManager.IMPORTANCE_LOW\n            ).apply {\n                description = getString(R.string.channel_description)\n            }\n            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager\n            manager.createNotificationChannel(channel)\n        }\n    }\n\n    private fun buildForegroundNotification(content: String): Notification {\n        return NotificationCompat.Builder(this, CHANNEL_ID)\n            .setContentTitle(\"Lilly AI Companion\")\n            .setContentText(content)\n            .setSmallIcon(android.R.drawable.sym_def_app_icon)\n            .setOngoing(true)\n            .build()\n    }\n\n    override fun onBind(intent: Intent?): IBinder? = null\n\n    override fun onDestroy() {\n        super.onDestroy()\n        serviceScope.cancel()\n        isRunning = false\n    }\n\n    companion object {\n        const val CHANNEL_ID = \"lilly_service_channel\"\n        const val NOTIFICATION_ID = 1001\n\n        fun start(context: Context) {\n            val intent = Intent(context, LillyForegroundService::class.java)\n            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {\n                context.startForegroundService(intent)\n            } else {\n                context.startService(intent)\n            }\n        }\n\n        fun stop(context: Context) {\n            val intent = Intent(context, LillyForegroundService::class.java)\n            context.stopService(intent)\n        }\n    }\n}\n"
+  },
+  {
+    path: "app/src/main/java/com/lilly/bot/service/DreamSyncWorker.kt",
+    name: "DreamSyncWorker.kt",
+    category: "kotlin_service",
+    language: "kotlin",
+    description: "WorkManager periodic background worker executing dream reflection and pruning",
+    content: "package com.lilly.bot.service\n\nimport android.content.Context\nimport androidx.work.CoroutineWorker\nimport androidx.work.WorkerParameters\nimport com.lilly.bot.data.memory.FileMemoryRepository\nimport com.lilly.bot.data.memory.MemoryPruner\nimport com.lilly.bot.data.storage.SettingsRepository\nimport kotlinx.coroutines.Dispatchers\nimport kotlinx.coroutines.flow.first\nimport kotlinx.coroutines.withContext\n\nclass DreamSyncWorker(\n    appContext: Context,\n    workerParams: WorkerParameters\n) : CoroutineWorker(appContext, workerParams) {\n\n    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {\n        try {\n            val repository = FileMemoryRepository(applicationContext)\n            val pruner = MemoryPruner(repository)\n            val settingsRepo = SettingsRepository(applicationContext)\n            val settings = settingsRepo.settingsFlow.first()\n\n            // Run retention & size limit pruning\n            val report = pruner.runPrune(settings)\n\n            Result.success()\n        } catch (e: Exception) {\n            Result.retry()\n        }\n    }\n\n    companion object {\n        const val WORK_NAME = \"lilly_dream_sync_work\"\n    }\n}\n"
+  },
+  {
+    path: "app/src/main/java/com/lilly/bot/ui/MainActivity.kt",
+    name: "MainActivity.kt",
+    category: "kotlin_ui",
+    language: "kotlin",
+    description: "Jetpack Compose root activity with bottom navigation bar",
+    content: "package com.lilly.bot.ui\n\nimport android.os.Bundle\nimport androidx.activity.ComponentActivity\nimport androidx.activity.compose.setContent\nimport androidx.activity.viewModels\nimport androidx.compose.foundation.layout.fillMaxSize\nimport androidx.compose.foundation.layout.padding\nimport androidx.compose.material.icons.Icons\nimport androidx.compose.material.icons.filled.ChatBubble\nimport androidx.compose.material.icons.filled.Folder\nimport androidx.compose.material.icons.filled.Settings\nimport androidx.compose.material3.*\nimport androidx.compose.runtime.*\nimport androidx.compose.ui.Modifier\nimport com.lilly.bot.service.LillyForegroundService\nimport com.lilly.bot.ui.theme.DarkBackground\nimport com.lilly.bot.ui.theme.DarkSurface\nimport com.lilly.bot.ui.theme.LillyBotTheme\n\nenum class MainTab {\n    CHAT,\n    MEMORY,\n    SETTINGS\n}\n\nclass MainActivity : ComponentActivity() {\n\n    private val viewModel: LillyViewModel by viewModels()\n\n    override fun onCreate(savedInstanceState: Bundle?) {\n        super.onCreate(savedInstanceState)\n\n        // Optionally start background companion service\n        runCatching {\n            LillyForegroundService.start(this)\n        }\n\n        setContent {\n            LillyBotTheme {\n                var selectedTab by remember { mutableStateOf(MainTab.CHAT) }\n\n                Scaffold(\n                    bottomBar = {\n                        NavigationBar(\n                            containerColor = DarkSurface\n                        ) {\n                            NavigationBarItem(\n                                selected = selectedTab == MainTab.CHAT,\n                                onClick = { selectedTab = MainTab.CHAT },\n                                icon = { Icon(Icons.Default.ChatBubble, contentDescription = \"Chat\") },\n                                label = { Text(\"Chat\") }\n                            )\n                            NavigationBarItem(\n                                selected = selectedTab == MainTab.MEMORY,\n                                onClick = { selectedTab = MainTab.MEMORY },\n                                icon = { Icon(Icons.Default.Folder, contentDescription = \"Memory\") },\n                                label = { Text(\"Memory\") }\n                            )\n                            NavigationBarItem(\n                                selected = selectedTab == MainTab.SETTINGS,\n                                onClick = { selectedTab = MainTab.SETTINGS },\n                                icon = { Icon(Icons.Default.Settings, contentDescription = \"Settings\") },\n                                label = { Text(\"Settings\") }\n                            )\n                        }\n                    },\n                    containerColor = DarkBackground\n                ) { innerPadding ->\n                    when (selectedTab) {\n                        MainTab.CHAT -> LillyChatScreen(\n                            viewModel = viewModel,\n                            modifier = Modifier.padding(innerPadding)\n                        )\n                        MainTab.MEMORY -> MemoryExplorerScreen(\n                            viewModel = viewModel,\n                            modifier = Modifier.padding(innerPadding)\n                        )\n                        MainTab.SETTINGS -> SettingsScreen(\n                            viewModel = viewModel,\n                            modifier = Modifier.padding(innerPadding)\n                        )\n                    }\n                }\n            }\n        }\n    }\n}\n"
+  },
+  {
+    path: "app/src/main/java/com/lilly/bot/ui/LillyViewModel.kt",
+    name: "LillyViewModel.kt",
+    category: "kotlin_ui",
+    language: "kotlin",
+    description: "StateFlow ViewModel bridging UI actions to LillyBrain orchestrator",
+    content: "package com.lilly.bot.ui\n\nimport android.app.Application\nimport androidx.lifecycle.AndroidViewModel\nimport androidx.lifecycle.viewModelScope\nimport com.lilly.bot.data.memory.FileMemoryRepository\nimport com.lilly.bot.data.memory.LocalHybridRetriever\nimport com.lilly.bot.data.network.CloudSearchClient\nimport com.lilly.bot.data.network.GeminiClient\nimport com.lilly.bot.data.network.InferenceClient\nimport com.lilly.bot.data.network.OpenAiClient\nimport com.lilly.bot.data.storage.InferenceProviderMode\nimport com.lilly.bot.data.storage.LillySettings\nimport com.lilly.bot.data.storage.SecureCredentials\nimport com.lilly.bot.data.storage.SettingsRepository\nimport com.lilly.bot.domain.brain.LillyBrain\nimport com.lilly.bot.domain.model.ChatMessage\nimport com.lilly.bot.domain.model.CompanionMode\nimport com.lilly.bot.domain.model.LillyCompanionState\nimport com.lilly.bot.domain.model.MemoryItem\nimport com.lilly.bot.domain.model.MemoryTier\nimport kotlinx.coroutines.flow.MutableStateFlow\nimport kotlinx.coroutines.flow.StateFlow\nimport kotlinx.coroutines.flow.asStateFlow\nimport kotlinx.coroutines.flow.first\nimport kotlinx.coroutines.launch\nimport java.io.InputStream\nimport java.io.OutputStream\n\nclass LillyViewModel(application: Application) : AndroidViewModel(application) {\n\n    val memoryRepo = FileMemoryRepository(application)\n    val retriever = LocalHybridRetriever(memoryRepo)\n    val cloudClient = CloudSearchClient()\n    val credentials = SecureCredentials(application)\n    val settingsRepo = SettingsRepository(application)\n\n    val brain = LillyBrain(\n        memoryRepo = memoryRepo,\n        retriever = retriever,\n        cloudClient = cloudClient,\n        credentials = credentials\n    )\n\n    val messages: StateFlow<List<ChatMessage>> = brain.messages\n    val companionState: StateFlow<LillyCompanionState> = brain.companionState\n\n    private val _settings = MutableStateFlow(LillySettings())\n    val settings: StateFlow<LillySettings> = _settings.asStateFlow()\n\n    private val _currentTierFiles = MutableStateFlow<List<MemoryItem>>(emptyList())\n    val currentTierFiles: StateFlow<List<MemoryItem>> = _currentTierFiles.asStateFlow()\n\n    private val _selectedTier = MutableStateFlow(MemoryTier.PERM)\n    val selectedTier: StateFlow<MemoryTier> = _selectedTier.asStateFlow()\n\n    private val _apiKeyInput = MutableStateFlow(credentials.apiKey)\n    val apiKeyInput: StateFlow<String> = _apiKeyInput.asStateFlow()\n\n    private val _cloudApiKeyInput = MutableStateFlow(credentials.cloudSearchApiKey)\n    val cloudApiKeyInput: StateFlow<String> = _cloudApiKeyInput.asStateFlow()\n\n    init {\n        viewModelScope.launch {\n            _settings.value = settingsRepo.settingsFlow.first()\n            loadMemoryTier(MemoryTier.PERM)\n        }\n    }\n\n    fun setApiKey(key: String) {\n        _apiKeyInput.value = key\n        credentials.apiKey = key\n    }\n\n    fun setCloudApiKey(key: String) {\n        _cloudApiKeyInput.value = key\n        credentials.cloudSearchApiKey = key\n    }\n\n    fun updateSettings(newSettings: LillySettings) {\n        _settings.value = newSettings\n        viewModelScope.launch {\n            settingsRepo.updateSettings { newSettings }\n        }\n    }\n\n    fun sendMessage(text: String) {\n        if (text.isBlank()) return\n        viewModelScope.launch {\n            val currentSettings = _settings.value\n            val client: InferenceClient = when (currentSettings.inferenceProviderMode) {\n                InferenceProviderMode.OPENAI_COMPATIBLE -> OpenAiClient()\n                InferenceProviderMode.GEMINI_NATIVE -> GeminiClient()\n            }\n\n            brain.sendMessage(\n                userInput = text,\n                settings = currentSettings,\n                inferenceClient = client\n            )\n        }\n    }\n\n    fun clearChat() {\n        brain.clearHistory()\n    }\n\n    fun loadMemoryTier(tier: MemoryTier) {\n        _selectedTier.value = tier\n        viewModelScope.launch {\n            _currentTierFiles.value = memoryRepo.listMemoryItems(tier)\n        }\n    }\n\n    fun saveMemoryFile(tier: MemoryTier, filename: String, content: String) {\n        memoryRepo.writeMemoryFile(tier, filename, content)\n        loadMemoryTier(tier)\n    }\n\n    fun deleteMemoryFile(tier: MemoryTier, filename: String) {\n        memoryRepo.deleteMemoryFile(tier, filename)\n        loadMemoryTier(tier)\n    }\n\n    fun exportMemory(outStream: OutputStream) {\n        memoryRepo.exportMemoryToZip(outStream)\n    }\n\n    fun importMemory(inStream: InputStream) {\n        memoryRepo.importMemoryFromZip(inStream)\n        loadMemoryTier(_selectedTier.value)\n    }\n}\n"
+  },
+  {
+    path: "app/src/main/java/com/lilly/bot/ui/LillyChatScreen.kt",
+    name: "LillyChatScreen.kt",
+    category: "kotlin_ui",
+    language: "kotlin",
+    description: "Discord-style multi-bubble conversation UI with live token streaming preview",
+    content: "package com.lilly.bot.ui\n\nimport androidx.compose.foundation.background\nimport androidx.compose.foundation.layout.*\nimport androidx.compose.foundation.lazy.LazyColumn\nimport androidx.compose.foundation.lazy.items\nimport androidx.compose.foundation.lazy.rememberLazyListState\nimport androidx.compose.foundation.shape.RoundedCornerShape\nimport androidx.compose.material.icons.Icons\nimport androidx.compose.material.icons.automirrored.filled.Send\nimport androidx.compose.material.icons.filled.Delete\nimport androidx.compose.material.icons.filled.Psychology\nimport androidx.compose.material3.*\nimport androidx.compose.runtime.*\nimport androidx.compose.ui.Alignment\nimport androidx.compose.ui.Modifier\nimport androidx.compose.ui.draw.clip\nimport androidx.compose.ui.graphics.Color\nimport androidx.compose.ui.unit.dp\nimport androidx.compose.ui.unit.sp\nimport com.lilly.bot.domain.model.ChatMessage\nimport com.lilly.bot.domain.model.CompanionMode\nimport com.lilly.bot.domain.model.Role\nimport com.lilly.bot.ui.theme.*\n\n@OptIn(ExperimentalMaterial3Api::class)\n@Composable\nfun LillyChatScreen(\n    viewModel: LillyViewModel,\n    modifier: Modifier = Modifier\n) {\n    val messages by viewModel.messages.collectAsState()\n    val companionState by viewModel.companionState.collectAsState()\n    var inputText by remember { mutableStateOf(\"\") }\n    val listState = rememberLazyListState()\n\n    LaunchedEffect(messages.size, companionState.streamBuffer) {\n        if (messages.isNotEmpty()) {\n            listState.animateScrollToItem(messages.size - 1)\n        }\n    }\n\n    Scaffold(\n        topBar = {\n            TopAppBar(\n                title = {\n                    Column {\n                        Text(\"Lilly\", fontWeight = androidx.compose.ui.text.font.FontWeight.Bold, fontSize = 18.sp)\n                        val statusText = when (companionState.mode) {\n                            CompanionMode.AWAKE -> \"Awake & Alert\"\n                            CompanionMode.SLEEP_INERTIA -> \"Waking up (Sleep Inertia)\"\n                            CompanionMode.DREAMING -> \"Dreaming & Reflecting\"\n                            CompanionMode.DEEP_SLEEP -> \"Deep Sleep / Hibernating\"\n                        }\n                        Text(\n                            text = statusText,\n                            fontSize = 12.sp,\n                            color = when (companionState.mode) {\n                                CompanionMode.AWAKE -> AccentEmerald\n                                CompanionMode.SLEEP_INERTIA -> AccentAmber\n                                else -> TextSecondary\n                            }\n                        )\n                    }\n                },\n                actions = {\n                    IconButton(onClick = { viewModel.clearChat() }) {\n                        Icon(Icons.Default.Delete, contentDescription = \"Clear History\", tint = TextSecondary)\n                    }\n                },\n                colors = TopAppBarDefaults.topAppBarColors(\n                    containerColor = DarkSurface,\n                    titleContentColor = TextPrimary\n                )\n            )\n        },\n        containerColor = DarkBackground,\n        modifier = modifier\n    ) { innerPadding ->\n        Column(\n            modifier = Modifier\n                .fillMaxSize()\n                .padding(innerPadding)\n        ) {\n            // Chat message list\n            LazyColumn(\n                state = listState,\n                modifier = Modifier\n                    .weight(1f)\n                    .fillMaxWidth()\n                    .padding(horizontal = 16.dp, vertical = 8.dp),\n                verticalArrangement = Arrangement.spacedBy(10.dp)\n            ) {\n                if (messages.isEmpty()) {\n                    item {\n                        Box(\n                            modifier = Modifier\n                                .fillMaxWidth()\n                                .padding(vertical = 40.dp),\n                            contentAlignment = Alignment.Center\n                        ) {\n                            Text(\n                                \"Start a conversation with Lilly.\\nHer responses reflect her 4-tier memory and personality.\",\n                                color = TextSecondary,\n                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,\n                                fontSize = 14.sp\n                            )\n                        }\n                    }\n                }\n\n                items(messages, key = { it.id }) { msg ->\n                    MessageRow(msg)\n                }\n\n                // Streaming preview bubble\n                if (companionState.isStreaming && companionState.streamBuffer.isNotEmpty()) {\n                    item {\n                        StreamingBubble(companionState.streamBuffer)\n                    }\n                }\n            }\n\n            // Input Bar\n            Surface(\n                color = DarkSurface,\n                modifier = Modifier.fillMaxWidth()\n            ) {\n                Row(\n                    modifier = Modifier\n                        .fillMaxWidth()\n                        .padding(horizontal = 12.dp, vertical = 8.dp),\n                    verticalAlignment = Alignment.CenterVertically\n                ) {\n                    TextField(\n                        value = inputText,\n                        onValueChange = { inputText = it },\n                        placeholder = { Text(\"Message Lilly...\", color = TextSecondary) },\n                        modifier = Modifier.weight(1f),\n                        colors = TextFieldDefaults.colors(\n                            focusedContainerColor = DarkCard,\n                            unfocusedContainerColor = DarkCard,\n                            focusedTextColor = TextPrimary,\n                            unfocusedTextColor = TextPrimary,\n                            focusedIndicatorColor = Color.Transparent,\n                            unfocusedIndicatorColor = Color.Transparent\n                        ),\n                        shape = RoundedCornerShape(24.dp),\n                        maxLines = 4\n                    )\n                    Spacer(modifier = Modifier.width(8.dp))\n                    IconButton(\n                        onClick = {\n                            if (inputText.isNotBlank()) {\n                                val text = inputText\n                                inputText = \"\"\n                                viewModel.sendMessage(text)\n                            }\n                        },\n                        colors = IconButtonDefaults.iconButtonColors(\n                            containerColor = AccentPurple,\n                            contentColor = Color.White\n                        )\n                    ) {\n                        Icon(Icons.AutoMirrored.Filled.Send, contentDescription = \"Send\")\n                    }\n                }\n            }\n        }\n    }\n}\n\n@Composable\nfun MessageRow(msg: ChatMessage) {\n    val isUser = msg.role == Role.USER\n\n    Column(\n        modifier = Modifier.fillMaxWidth(),\n        horizontalAlignment = if (isUser) Alignment.End else Alignment.Start\n    ) {\n        if (!isUser && msg.triggeredTools.isNotEmpty()) {\n            Row(\n                modifier = Modifier.padding(bottom = 4.dp),\n                verticalAlignment = Alignment.CenterVertically\n            ) {\n                Icon(\n                    Icons.Default.Psychology,\n                    contentDescription = \"Tool Used\",\n                    tint = AccentPurple,\n                    modifier = Modifier.size(14.dp)\n                )\n                Spacer(modifier = Modifier.width(4.dp))\n                Text(\n                    text = \"Lilly referenced memory/cloud\",\n                    fontSize = 11.sp,\n                    color = AccentPurple\n                )\n            }\n        }\n\n        if (isUser) {\n            Box(\n                modifier = Modifier\n                    .widthIn(max = 300.dp)\n                    .clip(RoundedCornerShape(16.dp, 16.dp, 4.dp, 16.dp))\n                    .background(AccentPurple)\n                    .padding(horizontal = 14.dp, vertical = 10.dp)\n            ) {\n                Text(text = msg.content, color = Color.White, fontSize = 15.sp)\n            }\n        } else {\n            // Render multi-bubbles if available\n            val displayBubbles = if (msg.bubbles.isNotEmpty()) msg.bubbles else listOf(msg.content)\n            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {\n                for (bubble in displayBubbles) {\n                    Box(\n                        modifier = Modifier\n                            .widthIn(max = 320.dp)\n                            .clip(RoundedCornerShape(16.dp, 16.dp, 16.dp, 4.dp))\n                            .background(DarkCard)\n                            .padding(horizontal = 14.dp, vertical = 10.dp)\n                    ) {\n                        Text(text = bubble, color = TextPrimary, fontSize = 15.sp)\n                    }\n                }\n            }\n        }\n    }\n}\n\n@Composable\nfun StreamingBubble(bufferText: String) {\n    Column(\n        modifier = Modifier.fillMaxWidth(),\n        horizontalAlignment = Alignment.Start\n    ) {\n        Box(\n            modifier = Modifier\n                .widthIn(max = 320.dp)\n                .clip(RoundedCornerShape(16.dp, 16.dp, 16.dp, 4.dp))\n                .background(DarkCard.copy(alpha = 0.8f))\n                .padding(horizontal = 14.dp, vertical = 10.dp)\n        ) {\n            Text(text = \"$bufferText \u258c\", color = TextSecondary, fontSize = 15.sp)\n        }\n    }\n}\n"
+  },
+  {
+    path: "app/src/main/java/com/lilly/bot/ui/MemoryExplorerScreen.kt",
+    name: "MemoryExplorerScreen.kt",
+    category: "kotlin_ui",
+    language: "kotlin",
+    description: "4-tier memory filesystem browser with SAF export and prompt inspector",
+    content: "package com.lilly.bot.ui\n\nimport androidx.activity.compose.rememberLauncherForActivityResult\nimport androidx.activity.result.contract.ActivityResultContracts\nimport androidx.compose.foundation.background\nimport androidx.compose.foundation.clickable\nimport androidx.compose.foundation.layout.*\nimport androidx.compose.foundation.lazy.LazyColumn\nimport androidx.compose.foundation.lazy.items\nimport androidx.compose.foundation.shape.RoundedCornerShape\nimport androidx.compose.material.icons.Icons\nimport androidx.compose.material.icons.filled.Add\nimport androidx.compose.material.icons.filled.Delete\nimport androidx.compose.material.icons.filled.Download\nimport androidx.compose.material.icons.filled.Upload\nimport androidx.compose.material3.*\nimport androidx.compose.runtime.*\nimport androidx.compose.ui.Alignment\nimport androidx.compose.ui.Modifier\nimport androidx.compose.ui.draw.clip\nimport androidx.compose.ui.graphics.Color\nimport androidx.compose.ui.platform.LocalContext\nimport androidx.compose.ui.unit.dp\nimport androidx.compose.ui.unit.sp\nimport com.lilly.bot.domain.model.MemoryItem\nimport com.lilly.bot.domain.model.MemoryTier\nimport com.lilly.bot.ui.theme.*\n\n@OptIn(ExperimentalMaterial3Api::class)\n@Composable\nfun MemoryExplorerScreen(\n    viewModel: LillyViewModel,\n    modifier: Modifier = Modifier\n) {\n    val context = LocalContext.current\n    val selectedTier by viewModel.selectedTier.collectAsState()\n    val files by viewModel.currentTierFiles.collectAsState()\n\n    var viewingItem by remember { mutableStateOf<MemoryItem?>(null) }\n    var isCreatingNew by remember { mutableStateOf(false) }\n    var newFilename by remember { mutableStateOf(\"\") }\n    var newContent by remember { mutableStateOf(\"\") }\n\n    val exportLauncher = rememberLauncherForActivityResult(\n        contract = ActivityResultContracts.CreateDocument(\"application/zip\")\n    ) { uri ->\n        uri?.let {\n            context.contentResolver.openOutputStream(it)?.use { outStream ->\n                viewModel.exportMemory(outStream)\n            }\n        }\n    }\n\n    val importLauncher = rememberLauncherForActivityResult(\n        contract = ActivityResultContracts.OpenDocument()\n    ) { uri ->\n        uri?.let {\n            context.contentResolver.openInputStream(it)?.use { inStream ->\n                viewModel.importMemory(inStream)\n            }\n        }\n    }\n\n    Scaffold(\n        topBar = {\n            TopAppBar(\n                title = { Text(\"Memory Library\", fontWeight = androidx.compose.ui.text.font.FontWeight.Bold) },\n                actions = {\n                    IconButton(onClick = { exportLauncher.launch(\"lilly_memory_backup.zip\") }) {\n                        Icon(Icons.Default.Download, contentDescription = \"Export ZIP\", tint = TextSecondary)\n                    }\n                    IconButton(onClick = { importLauncher.launch(arrayOf(\"application/zip\")) }) {\n                        Icon(Icons.Default.Upload, contentDescription = \"Import ZIP\", tint = TextSecondary)\n                    }\n                    IconButton(onClick = { isCreatingNew = true }) {\n                        Icon(Icons.Default.Add, contentDescription = \"Add Memory\", tint = AccentPurple)\n                    }\n                },\n                colors = TopAppBarDefaults.topAppBarColors(\n                    containerColor = DarkSurface,\n                    titleContentColor = TextPrimary\n                )\n            )\n        },\n        containerColor = DarkBackground,\n        modifier = modifier\n    ) { innerPadding ->\n        Column(\n            modifier = Modifier\n                .fillMaxSize()\n                .padding(innerPadding)\n        ) {\n            // Tier Selector Tabs\n            ScrollableTabRow(\n                selectedTabIndex = selectedTier.ordinal,\n                containerColor = DarkSurface,\n                contentColor = AccentPurple,\n                edgePadding = 16.dp\n            ) {\n                MemoryTier.entries.forEach { tier ->\n                    Tab(\n                        selected = selectedTier == tier,\n                        onClick = { viewModel.loadMemoryTier(tier) },\n                        text = {\n                            Text(\n                                text = \"${tier.dirName} (${tier.name})\",\n                                fontSize = 13.sp,\n                                color = if (selectedTier == tier) AccentPurple else TextSecondary\n                            )\n                        }\n                    )\n                }\n            }\n\n            // File list\n            LazyColumn(\n                modifier = Modifier\n                    .fillMaxSize()\n                    .padding(16.dp),\n                verticalArrangement = Arrangement.spacedBy(8.dp)\n            ) {\n                if (files.isEmpty()) {\n                    item {\n                        Box(\n                            modifier = Modifier\n                                .fillMaxWidth()\n                                .padding(vertical = 40.dp),\n                            contentAlignment = Alignment.Center\n                        ) {\n                            Text(\n                                \"No memory files in ${selectedTier.dirName}.\",\n                                color = TextSecondary,\n                                fontSize = 14.sp\n                            )\n                        }\n                    }\n                }\n\n                items(files, key = { it.filename }) { item ->\n                    Card(\n                        colors = CardDefaults.cardColors(containerColor = DarkCard),\n                        modifier = Modifier\n                            .fillMaxWidth()\n                            .clickable { viewingItem = item }\n                    ) {\n                        Row(\n                            modifier = Modifier\n                                .fillMaxWidth()\n                                .padding(14.dp),\n                            verticalAlignment = Alignment.CenterVertically\n                        ) {\n                            Column(modifier = Modifier.weight(1f)) {\n                                Text(\n                                    text = item.filename,\n                                    color = TextPrimary,\n                                    fontSize = 15.sp,\n                                    fontWeight = androidx.compose.ui.text.font.FontWeight.Medium\n                                )\n                                Spacer(modifier = Modifier.height(4.dp))\n                                Text(\n                                    text = \"${item.sizeBytes} bytes \u00b7 modified ${java.util.Date(item.lastModified)}\",\n                                    color = TextSecondary,\n                                    fontSize = 12.sp\n                                )\n                            }\n                            IconButton(onClick = { viewModel.deleteMemoryFile(selectedTier, item.filename) }) {\n                                Icon(Icons.Default.Delete, contentDescription = \"Delete\", tint = TextSecondary)\n                            }\n                        }\n                    }\n                }\n            }\n        }\n\n        // View/Edit Dialog\n        viewingItem?.let { item ->\n            var editedContent by remember { mutableStateOf(item.content) }\n            AlertDialog(\n                onDismissRequest = { viewingItem = null },\n                title = { Text(item.filename, color = TextPrimary) },\n                text = {\n                    TextField(\n                        value = editedContent,\n                        onValueChange = { editedContent = it },\n                        modifier = Modifier\n                            .fillMaxWidth()\n                            .height(300.dp),\n                        colors = TextFieldDefaults.colors(\n                            focusedContainerColor = DarkSurface,\n                            unfocusedContainerColor = DarkSurface,\n                            focusedTextColor = TextPrimary,\n                            unfocusedTextColor = TextPrimary\n                        )\n                    )\n                },\n                confirmButton = {\n                    Button(\n                        onClick = {\n                            viewModel.saveMemoryFile(item.tier, item.filename, editedContent)\n                            viewingItem = null\n                        },\n                        colors = ButtonDefaults.buttonColors(containerColor = AccentPurple)\n                    ) {\n                        Text(\"Save\")\n                    }\n                },\n                dismissButton = {\n                    TextButton(onClick = { viewingItem = null }) {\n                        Text(\"Close\", color = TextSecondary)\n                    }\n                },\n                containerColor = DarkCard\n            )\n        }\n\n        // Create New Memory Dialog\n        if (isCreatingNew) {\n            AlertDialog(\n                onDismissRequest = { isCreatingNew = false },\n                title = { Text(\"New Memory in ${selectedTier.dirName}\", color = TextPrimary) },\n                text = {\n                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {\n                        TextField(\n                            value = newFilename,\n                            onValueChange = { newFilename = it },\n                            placeholder = { Text(\"filename.txt\", color = TextSecondary) },\n                            singleLine = true,\n                            colors = TextFieldDefaults.colors(\n                                focusedContainerColor = DarkSurface,\n                                unfocusedContainerColor = DarkSurface,\n                                focusedTextColor = TextPrimary,\n                                unfocusedTextColor = TextPrimary\n                            )\n                        )\n                        TextField(\n                            value = newContent,\n                            onValueChange = { newContent = it },\n                            placeholder = { Text(\"Enter memory content...\", color = TextSecondary) },\n                            modifier = Modifier.height(200.dp),\n                            colors = TextFieldDefaults.colors(\n                                focusedContainerColor = DarkSurface,\n                                unfocusedContainerColor = DarkSurface,\n                                focusedTextColor = TextPrimary,\n                                unfocusedTextColor = TextPrimary\n                            )\n                        )\n                    }\n                },\n                confirmButton = {\n                    Button(\n                        onClick = {\n                            if (newFilename.isNotBlank() && newContent.isNotBlank()) {\n                                viewModel.saveMemoryFile(selectedTier, newFilename, newContent)\n                                newFilename = \"\"\n                                newContent = \"\"\n                                isCreatingNew = false\n                            }\n                        },\n                        colors = ButtonDefaults.buttonColors(containerColor = AccentPurple)\n                    ) {\n                        Text(\"Create\")\n                    }\n                },\n                dismissButton = {\n                    TextButton(onClick = { isCreatingNew = false }) {\n                        Text(\"Cancel\", color = TextSecondary)\n                    }\n                },\n                containerColor = DarkCard\n            )\n        }\n    }\n}\n"
+  },
+  {
+    path: "app/src/main/java/com/lilly/bot/ui/SettingsScreen.kt",
+    name: "SettingsScreen.kt",
+    category: "kotlin_ui",
+    language: "kotlin",
+    description: "Jetpack Compose configuration editor for all 34 parameters",
+    content: "package com.lilly.bot.ui\n\nimport androidx.compose.foundation.background\nimport androidx.compose.foundation.layout.*\nimport androidx.compose.foundation.rememberScrollState\nimport androidx.compose.foundation.verticalScroll\nimport androidx.compose.material3.*\nimport androidx.compose.runtime.*\nimport androidx.compose.ui.Alignment\nimport androidx.compose.ui.Modifier\nimport androidx.compose.ui.graphics.Color\nimport androidx.compose.ui.text.font.FontWeight\nimport androidx.compose.ui.unit.dp\nimport androidx.compose.ui.unit.sp\nimport com.lilly.bot.data.storage.InferenceProviderMode\nimport com.lilly.bot.data.storage.RetrieverMode\nimport com.lilly.bot.ui.theme.*\n\n@OptIn(ExperimentalMaterial3Api::class)\n@Composable\nfun SettingsScreen(\n    viewModel: LillyViewModel,\n    modifier: Modifier = Modifier\n) {\n    val settings by viewModel.settings.collectAsState()\n    val apiKey by viewModel.apiKeyInput.collectAsState()\n    val cloudApiKey by viewModel.cloudApiKeyInput.collectAsState()\n\n    var tempApiKey by remember(apiKey) { mutableStateOf(apiKey) }\n    var tempCloudApiKey by remember(cloudApiKey) { mutableStateOf(cloudApiKey) }\n    val scrollState = rememberScrollState()\n\n    Scaffold(\n        topBar = {\n            TopAppBar(\n                title = { Text(\"Settings & Brain Config\", fontWeight = FontWeight.Bold) },\n                colors = TopAppBarDefaults.topAppBarColors(\n                    containerColor = DarkSurface,\n                    titleContentColor = TextPrimary\n                )\n            )\n        },\n        containerColor = DarkBackground,\n        modifier = modifier\n    ) { innerPadding ->\n        Column(\n            modifier = Modifier\n                .fillMaxSize()\n                .padding(innerPadding)\n                .verticalScroll(scrollState)\n                .padding(16.dp),\n            verticalArrangement = Arrangement.spacedBy(20.dp)\n        ) {\n            // Section A: Inference & Provider Settings\n            SettingsSectionHeader(\"A. Inference & Provider\")\n\n            // Provider Mode\n            Text(\"Inference Provider Mode\", color = TextSecondary, fontSize = 13.sp)\n            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {\n                FilterChip(\n                    selected = settings.inferenceProviderMode == InferenceProviderMode.OPENAI_COMPATIBLE,\n                    onClick = { viewModel.updateSettings(settings.copy(inferenceProviderMode = InferenceProviderMode.OPENAI_COMPATIBLE)) },\n                    label = { Text(\"OpenAI-Compatible\") }\n                )\n                FilterChip(\n                    selected = settings.inferenceProviderMode == InferenceProviderMode.GEMINI_NATIVE,\n                    onClick = { viewModel.updateSettings(settings.copy(inferenceProviderMode = InferenceProviderMode.GEMINI_NATIVE)) },\n                    label = { Text(\"Gemini Native\") }\n                )\n            }\n\n            // API Key\n            OutlinedTextField(\n                value = tempApiKey,\n                onValueChange = {\n                    tempApiKey = it\n                    viewModel.setApiKey(it)\n                },\n                label = { Text(\"Primary API Key (OpenAI or Gemini)\") },\n                placeholder = { Text(\"None (Required to speak with Lilly)\") },\n                modifier = Modifier.fillMaxWidth(),\n                singleLine = true,\n                colors = OutlinedTextFieldDefaults.colors(\n                    focusedBorderColor = AccentPurple,\n                    unfocusedBorderColor = DarkBorder,\n                    focusedTextColor = TextPrimary,\n                    unfocusedTextColor = TextPrimary\n                )\n            )\n\n            // API URL (for OpenAI compatible)\n            if (settings.inferenceProviderMode == InferenceProviderMode.OPENAI_COMPATIBLE) {\n                OutlinedTextField(\n                    value = settings.apiUrl,\n                    onValueChange = { viewModel.updateSettings(settings.copy(apiUrl = it)) },\n                    label = { Text(\"API URL\") },\n                    modifier = Modifier.fillMaxWidth(),\n                    singleLine = true,\n                    colors = OutlinedTextFieldDefaults.colors(\n                        focusedBorderColor = AccentPurple,\n                        unfocusedBorderColor = DarkBorder,\n                        focusedTextColor = TextPrimary,\n                        unfocusedTextColor = TextPrimary\n                    )\n                )\n            }\n\n            // Model Name\n            OutlinedTextField(\n                value = settings.modelName,\n                onValueChange = { viewModel.updateSettings(settings.copy(modelName = it)) },\n                label = { Text(\"Model Name\") },\n                modifier = Modifier.fillMaxWidth(),\n                singleLine = true,\n                colors = OutlinedTextFieldDefaults.colors(\n                    focusedBorderColor = AccentPurple,\n                    unfocusedBorderColor = DarkBorder,\n                    focusedTextColor = TextPrimary,\n                    unfocusedTextColor = TextPrimary\n                )\n            )\n\n            // Temperature Slider\n            Column {\n                Text(\"Temperature: ${String.format(\"%.2f\", settings.temperature)}\", color = TextSecondary, fontSize = 13.sp)\n                Slider(\n                    value = settings.temperature,\n                    onValueChange = { viewModel.updateSettings(settings.copy(temperature = it)) },\n                    valueRange = 0.0f..1.5f,\n                    colors = SliderDefaults.colors(\n                        thumbColor = AccentPurple,\n                        activeTrackColor = AccentPurple\n                    )\n                )\n            }\n\n            // Token Limits\n            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {\n                OutlinedTextField(\n                    value = settings.modelContextTokens.toString(),\n                    onValueChange = { it.toIntOrNull()?.let { v -> viewModel.updateSettings(settings.copy(modelContextTokens = v)) } },\n                    label = { Text(\"Context Tokens\") },\n                    modifier = Modifier.weight(1f),\n                    singleLine = true,\n                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AccentPurple, unfocusedBorderColor = DarkBorder)\n                )\n                OutlinedTextField(\n                    value = settings.responseTokenReserve.toString(),\n                    onValueChange = { it.toIntOrNull()?.let { v -> viewModel.updateSettings(settings.copy(responseTokenReserve = v)) } },\n                    label = { Text(\"Reserve Tokens\") },\n                    modifier = Modifier.weight(1f),\n                    singleLine = true,\n                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AccentPurple, unfocusedBorderColor = DarkBorder)\n                )\n            }\n\n            // Streaming Preview Toggle\n            Row(\n                modifier = Modifier.fillMaxWidth(),\n                horizontalArrangement = Arrangement.SpaceBetween,\n                verticalAlignment = Alignment.CenterVertically\n            ) {\n                Column {\n                    Text(\"Stream Preview\", color = TextPrimary, fontSize = 15.sp)\n                    Text(\"Live token streaming edits\", color = TextSecondary, fontSize = 12.sp)\n                }\n                Switch(\n                    checked = settings.streamPreviewEnabled,\n                    onCheckedChange = { viewModel.updateSettings(settings.copy(streamPreviewEnabled = it)) }\n                )\n            }\n\n            // Section B: Cloud Search & Retriever\n            SettingsSectionHeader(\"B. Cloud Search & Retriever\")\n\n            Row(\n                modifier = Modifier.fillMaxWidth(),\n                horizontalArrangement = Arrangement.SpaceBetween,\n                verticalAlignment = Alignment.CenterVertically\n            ) {\n                Column {\n                    Text(\"Enable Cloud Agent [CLOUD]\", color = TextPrimary, fontSize = 15.sp)\n                    Text(\"Allows internet research & math via Cloud Agent\", color = TextSecondary, fontSize = 12.sp)\n                }\n                Switch(\n                    checked = settings.cloudSearchEnabled,\n                    onCheckedChange = { viewModel.updateSettings(settings.copy(cloudSearchEnabled = it)) }\n                )\n            }\n\n            OutlinedTextField(\n                value = tempCloudApiKey,\n                onValueChange = {\n                    tempCloudApiKey = it\n                    viewModel.setCloudApiKey(it)\n                },\n                label = { Text(\"Cloud Agent API Key (Optional fallback)\") },\n                modifier = Modifier.fillMaxWidth(),\n                singleLine = true,\n                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AccentPurple, unfocusedBorderColor = DarkBorder)\n            )\n\n            // Section C: Timers & Retention\n            SettingsSectionHeader(\"C. Timers, Retention, & Sleep\")\n\n            OutlinedTextField(\n                value = settings.timezoneName,\n                onValueChange = { viewModel.updateSettings(settings.copy(timezoneName = it)) },\n                label = { Text(\"Timezone (ZoneId)\") },\n                modifier = Modifier.fillMaxWidth(),\n                singleLine = true,\n                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AccentPurple, unfocusedBorderColor = DarkBorder)\n            )\n\n            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {\n                OutlinedTextField(\n                    value = settings.idleSortAfterMinutes.toString(),\n                    onValueChange = { it.toIntOrNull()?.let { v -> viewModel.updateSettings(settings.copy(idleSortAfterMinutes = v)) } },\n                    label = { Text(\"Idle Sleep (min)\") },\n                    modifier = Modifier.weight(1f),\n                    singleLine = true,\n                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AccentPurple, unfocusedBorderColor = DarkBorder)\n                )\n                OutlinedTextField(\n                    value = settings.dreamShutdownMinutes.toString(),\n                    onValueChange = { it.toIntOrNull()?.let { v -> viewModel.updateSettings(settings.copy(dreamShutdownMinutes = v)) } },\n                    label = { Text(\"Dream Deep (min)\") },\n                    modifier = Modifier.weight(1f),\n                    singleLine = true,\n                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AccentPurple, unfocusedBorderColor = DarkBorder)\n                )\n            }\n\n            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {\n                OutlinedTextField(\n                    value = settings.shortTermRetentionDays.toString(),\n                    onValueChange = { it.toIntOrNull()?.let { v -> viewModel.updateSettings(settings.copy(shortTermRetentionDays = v)) } },\n                    label = { Text(\"Short-term (days)\") },\n                    modifier = Modifier.weight(1f),\n                    singleLine = true,\n                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AccentPurple, unfocusedBorderColor = DarkBorder)\n                )\n                OutlinedTextField(\n                    value = settings.longTermRetentionDays.toString(),\n                    onValueChange = { it.toIntOrNull()?.let { v -> viewModel.updateSettings(settings.copy(longTermRetentionDays = v)) } },\n                    label = { Text(\"Long-term (days)\") },\n                    modifier = Modifier.weight(1f),\n                    singleLine = true,\n                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AccentPurple, unfocusedBorderColor = DarkBorder)\n                )\n            }\n        }\n    }\n}\n\n@Composable\nfun SettingsSectionHeader(title: String) {\n    Text(\n        text = title,\n        color = AccentPurple,\n        fontSize = 14.sp,\n        fontWeight = FontWeight.Bold,\n        modifier = Modifier.padding(top = 8.dp)\n    )\n}\n"
+  },
+  {
+    path: "app/src/main/java/com/lilly/bot/ui/theme/Color.kt",
+    name: "Color.kt",
+    category: "kotlin_ui",
+    language: "kotlin",
+    description: "Color definitions matching Lilly companion dark slate and violet aesthetic",
+    content: "package com.lilly.bot.ui.theme\n\nimport androidx.compose.ui.graphics.Color\n\nval Purple80 = Color(0xFFD0BCFF)\nval PurpleGrey80 = Color(0xFFCCC2DC)\nval Pink80 = Color(0xFFEFB8C8)\n\nval Purple40 = Color(0xFF8B5CF6)\nval PurpleDark = Color(0xFF6D28D9)\nval PurpleGrey40 = Color(0xFF625B71)\nval Pink40 = Color(0xFF7D5260)\n\nval DarkBackground = Color(0xFF0B0F19)\nval DarkSurface = Color(0xFF111827)\nval DarkCard = Color(0xFF1E293B)\nval DarkBorder = Color(0xFF334155)\nval TextPrimary = Color(0xFFF8FAFC)\nval TextSecondary = Color(0xFF94A3B8)\nval AccentPurple = Color(0xFF8B5CF6)\nval AccentEmerald = Color(0xFF10B981)\nval AccentAmber = Color(0xFFF59E0B)\n"
+  },
+  {
+    path: "app/src/main/java/com/lilly/bot/ui/theme/Theme.kt",
+    name: "Theme.kt",
+    category: "kotlin_ui",
+    language: "kotlin",
+    description: "Material 3 theme setup with dynamic DarkColorScheme",
+    content: "package com.lilly.bot.ui.theme\n\nimport androidx.compose.material3.MaterialTheme\nimport androidx.compose.material3.darkColorScheme\nimport androidx.compose.runtime.Composable\n\nprivate val DarkColorScheme = darkColorScheme(\n    primary = AccentPurple,\n    secondary = PurpleGrey80,\n    tertiary = Pink80,\n    background = DarkBackground,\n    surface = DarkSurface,\n    onPrimary = TextPrimary,\n    onSecondary = TextPrimary,\n    onBackground = TextPrimary,\n    onSurface = TextPrimary\n)\n\n@Composable\nfun LillyBotTheme(\n    content: @Composable () -> Unit\n) {\n    MaterialTheme(\n        colorScheme = DarkColorScheme,\n        typography = Typography,\n        content = content\n    )\n}\n"
+  },
+  {
+    path: "app/src/main/java/com/lilly/bot/ui/theme/Type.kt",
+    name: "Type.kt",
+    category: "kotlin_ui",
+    language: "kotlin",
+    description: "Typography configurations for Jetpack Compose UI",
+    content: "package com.lilly.bot.ui.theme\n\nimport androidx.compose.material3.Typography\nimport androidx.compose.ui.text.TextStyle\nimport androidx.compose.ui.text.font.FontFamily\nimport androidx.compose.ui.text.font.FontWeight\nimport androidx.compose.ui.unit.sp\n\nval Typography = Typography(\n    bodyLarge = TextStyle(\n        fontFamily = FontFamily.Default,\n        fontWeight = FontWeight.Normal,\n        fontSize = 16.sp,\n        lineHeight = 24.sp,\n        letterSpacing = 0.5.sp\n    ),\n    titleLarge = TextStyle(\n        fontFamily = FontFamily.Default,\n        fontWeight = FontWeight.Bold,\n        fontSize = 22.sp,\n        lineHeight = 28.sp,\n        letterSpacing = 0.sp\n    ),\n    labelSmall = TextStyle(\n        fontFamily = FontFamily.Default,\n        fontWeight = FontWeight.Medium,\n        fontSize = 11.sp,\n        lineHeight = 16.sp,\n        letterSpacing = 0.5.sp\n    )\n)\n"
+  },
 ];

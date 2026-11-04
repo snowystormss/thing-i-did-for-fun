@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import JSZip from 'jszip';
 import { ANDROID_PROJECT_FILES, AndroidFile } from './data/androidProjectFiles';
+import { GRADLE_WRAPPER_JAR_BASE64 } from './data/gradleWrapperJar';
 import { ProjectTree } from './components/ProjectTree';
 import { CodeViewer } from './components/CodeViewer';
 import { EnginePlayground } from './components/EnginePlayground';
@@ -34,7 +35,19 @@ export default function App() {
 
       // Add all project files into the root folder
       for (const file of ANDROID_PROJECT_FILES) {
-        zip.file(file.path, file.content);
+        if (file.path === 'gradlew') {
+          // Provide Unix execution permissions (0755) in ZIP metadata
+          zip.file(file.path, file.content, {
+            unixPermissions: 0o755
+          });
+        } else {
+          zip.file(file.path, file.content);
+        }
+      }
+
+      // Add the Gradle Wrapper binary JAR so gradlew runs immediately out-of-the-box
+      if (GRADLE_WRAPPER_JAR_BASE64) {
+        zip.file('gradle/wrapper/gradle-wrapper.jar', GRADLE_WRAPPER_JAR_BASE64, { base64: true });
       }
 
       // Add a helpful README.md for Android Studio

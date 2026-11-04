@@ -99,6 +99,10 @@ export const ProjectTree: React.FC<ProjectTreeProps> = ({
                           <span className="text-[10px] font-mono px-1 py-0.5 rounded bg-purple-950/80 text-purple-300 border border-purple-800/60 font-semibold">KT</span>
                         ) : file.language === 'xml' ? (
                           <span className="text-[10px] font-mono px-1 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800/60 font-semibold">XML</span>
+                        ) : file.language === 'toml' ? (
+                          <span className="text-[10px] font-mono px-1 py-0.5 rounded bg-amber-950/80 text-amber-300 border border-amber-800/60 font-semibold">TOML</span>
+                        ) : file.language === 'sh' || file.language === 'bat' ? (
+                          <span className="text-[10px] font-mono px-1 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800/60 font-semibold">SH</span>
                         ) : (
                           <span className="text-[10px] font-mono px-1 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold">CFG</span>
                         )}
