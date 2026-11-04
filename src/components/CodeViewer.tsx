@@ -94,23 +94,45 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({ file }) => {
   );
 };
 
-// Lightweight client-side syntax highlighter for Kotlin and XML
+// Lightweight client-side syntax highlighter for Kotlin, XML, TOML, scripts, and properties
 function highlightSyntax(line: string, language: AndroidFile['language']): React.ReactNode {
+  const trimmed = line.trim();
+
+  // Comments in XML
   if (language === 'xml') {
-    if (line.trim().startsWith('<!--')) {
+    if (trimmed.startsWith('<!--')) {
       return <span className="text-slate-500 italic">{line}</span>;
     }
     return <span className="text-emerald-300">{line}</span>;
   }
 
-  // Kotlin highlights
-  const trimmed = line.trim();
+  // Comments in Bash/TOML/Properties/Pro
+  if (language === 'sh' || language === 'bat' || language === 'toml' || language === 'properties' || language === 'pro') {
+    if (trimmed.startsWith('#') || trimmed.startsWith('REM ') || trimmed.startsWith('@rem') || trimmed.startsWith('::')) {
+      return <span className="text-slate-500 italic">{line}</span>;
+    }
+    if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+      return <span className="text-purple-400 font-bold">{line}</span>;
+    }
+    if (trimmed.includes('=')) {
+      const parts = line.split('=');
+      return (
+        <span>
+          <span className="text-cyan-300">{parts[0]}</span>
+          <span className="text-slate-400">=</span>
+          <span className="text-amber-300">{parts.slice(1).join('=')}</span>
+        </span>
+      );
+    }
+    return <span className="text-slate-300">{line}</span>;
+  }
+
+  // Kotlin & Kotlin DSL highlights
   if (trimmed.startsWith('//') || trimmed.startsWith('/*') || trimmed.startsWith('*')) {
     return <span className="text-slate-500 italic">{line}</span>;
   }
 
-  // Quick token replacement for keywords
-  const keywords = ['package', 'import', 'class', 'object', 'data', 'enum', 'interface', 'fun', 'val', 'var', 'private', 'override', 'suspend', 'return', 'when', 'if', 'else', 'for', 'while', 'get', 'set', 'is', 'try', 'catch'];
+  const keywords = ['package', 'import', 'class', 'object', 'data', 'enum', 'interface', 'fun', 'val', 'var', 'private', 'override', 'suspend', 'return', 'when', 'if', 'else', 'for', 'while', 'get', 'set', 'is', 'try', 'catch', 'plugins', 'dependencies', 'implementation', 'android'];
 
   const words = line.split(/(\s+|[(),.:;={}\[\]<>?&|*!+-\/"])/);
   return words.map((token, idx) => {
