@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Lilly</string>
+    <string name="channel_name">Lilly Companion Service</string>
+    <string name="channel_description">Runs Lilly companion background tasks and dream sync</string>
+</resources>

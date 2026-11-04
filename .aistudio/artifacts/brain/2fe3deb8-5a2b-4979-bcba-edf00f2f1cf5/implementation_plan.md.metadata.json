@@ -1,0 +1,6 @@
+{
+  "summary": "Implementation plan for Lilly: complete Android Studio project structure (Kotlin + Jetpack Compose) faithfully implementing the 4-tier memory architecture, state machine, token budgeting, and tool loops from aigfbutREAL.py, accompanied by a production-grade Android Project Explorer & Code Inspector web UI with ZIP export.",
+  "updatedAt": "2026-11-04T15:13:00.289478923Z",
+  "requestFeedback": true,
+  "userFacing": true
+}

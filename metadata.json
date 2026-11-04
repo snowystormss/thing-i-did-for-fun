@@ -1,0 +1,6 @@
+{
+  "name": "Lilly Android Project Hub",
+  "description": "Production-grade native Android app project (Kotlin + Jetpack Compose) for Lilly AI companion with 4-tier memory, state machine, and architecture code inspector.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
