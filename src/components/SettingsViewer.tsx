@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sliders, Key, ShieldCheck, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Sliders, Key, ShieldCheck, CheckCircle2, AlertCircle, Search, X, RotateCcw } from 'lucide-react';
 
 interface SettingDef {
   key: string;
@@ -317,19 +317,36 @@ export const SettingsViewer: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <input
-            type="text"
-            placeholder="Search settings..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500"
-          />
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-slate-400 font-mono" aria-live="polite">
+            {filtered.length} of {SETTINGS_DEFAULTS.length} settings
+          </span>
+          <div className="relative flex items-center">
+            <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 pointer-events-none" aria-hidden="true" />
+            <input
+              type="text"
+              aria-label="Search settings by name, key, or description"
+              placeholder="Search settings..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-7 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500 focus-visible:ring-1 focus-visible:ring-purple-500"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                aria-label="Clear settings search filter"
+                className="absolute right-2 p-0.5 text-slate-500 hover:text-slate-300 rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-400"
+              >
+                <X className="w-3.5 h-3.5" aria-hidden="true" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Category Pills */}
-      <div className="flex flex-wrap gap-2 my-4">
+      <div className="flex flex-wrap gap-2 my-4" role="tablist" aria-label="Settings categories">
         {categories.map(cat => (
           <button
             key={cat}
@@ -347,32 +364,54 @@ export const SettingsViewer: React.FC = () => {
 
       {/* Settings Grid / Table */}
       <div className="space-y-3">
-        {filtered.map(setting => (
-          <div
-            key={setting.key}
-            className="p-4 bg-slate-950 rounded-xl border border-slate-800/80 hover:border-slate-700 transition-colors flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
-          >
-            <div className="space-y-1 flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-xs text-slate-200">{setting.name}</span>
-                <span className="font-mono text-[10px] text-purple-400 bg-purple-950/60 px-1.5 py-0.5 rounded border border-purple-800/40">
-                  {setting.key}
-                </span>
-                <span className="text-[10px] text-slate-500 font-mono">
-                  [{setting.type}]
+        {filtered.length === 0 ? (
+          <div className="p-8 text-center bg-slate-950 rounded-xl border border-dashed border-slate-800 flex flex-col items-center justify-center gap-3">
+            <AlertCircle className="w-8 h-8 text-slate-600" aria-hidden="true" />
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-slate-300">No matching settings found</p>
+              <p className="text-xs text-slate-500">
+                {search ? `No parameters matched "${search}". Try adjusting your keywords or category filter.` : 'No parameters in this category.'}
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setSearch('');
+                setSelectedCategory('All');
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 mt-1 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 rounded-lg text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
+            >
+              <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>Reset filters</span>
+            </button>
+          </div>
+        ) : (
+          filtered.map(setting => (
+            <div
+              key={setting.key}
+              className="p-4 bg-slate-950 rounded-xl border border-slate-800/80 hover:border-slate-700 transition-colors flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            >
+              <div className="space-y-1 flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-xs text-slate-200">{setting.name}</span>
+                  <span className="font-mono text-[10px] text-purple-400 bg-purple-950/60 px-1.5 py-0.5 rounded border border-purple-800/40">
+                    {setting.key}
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-mono">
+                    [{setting.type}]
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">{setting.description}</p>
+              </div>
+
+              <div className="shrink-0 text-right sm:w-64">
+                <span className="text-[10px] text-slate-500 uppercase font-mono block">Exact Default Value</span>
+                <span className="font-mono text-xs text-emerald-400 font-medium break-all">
+                  {setting.defaultValue}
                 </span>
               </div>
-              <p className="text-xs text-slate-400 leading-relaxed">{setting.description}</p>
             </div>
-
-            <div className="shrink-0 text-right sm:w-64">
-              <span className="text-[10px] text-slate-500 uppercase font-mono block">Exact Default Value</span>
-              <span className="font-mono text-xs text-emerald-400 font-medium break-all">
-                {setting.defaultValue}
-              </span>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );
