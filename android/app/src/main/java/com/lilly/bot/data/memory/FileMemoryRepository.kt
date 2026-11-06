@@ -143,6 +143,10 @@ Never sound like an overly polite corporate AI assistant or generic chatbot.
         val dir = getTierDir(tier)
         val cleanName = if (filename.endsWith(".txt")) filename else "$filename.txt"
         val file = File(dir, cleanName)
+        // Prevent path traversal in filename input
+        if (!file.canonicalPath.startsWith(dir.canonicalPath + File.separator)) {
+            throw SecurityException("Invalid filename attempted path traversal: $filename")
+        }
         file.writeText(content, Charsets.UTF_8)
         if (tier == MemoryTier.PERM) {
             cachedSystemPrompt = null
@@ -152,6 +156,10 @@ Never sound like an overly polite corporate AI assistant or generic chatbot.
     fun deleteMemoryFile(tier: MemoryTier, filename: String): Boolean {
         val dir = getTierDir(tier)
         val file = File(dir, filename)
+        // Prevent path traversal in filename input
+        if (!file.canonicalPath.startsWith(dir.canonicalPath + File.separator)) {
+            throw SecurityException("Invalid filename attempted path traversal: $filename")
+        }
         val deleted = file.delete()
         if (tier == MemoryTier.PERM) {
             cachedSystemPrompt = null
@@ -179,13 +187,19 @@ Never sound like an overly polite corporate AI assistant or generic chatbot.
 
     /**
      * Imports a ZIP stream over memory base.
+     * Prevents Zip Slip path traversal vulnerabilities by verifying canonical destination path.
      */
     fun importMemoryFromZip(inputStream: InputStream) {
+        val canonicalBase = memBase.canonicalPath
         ZipInputStream(inputStream).use { zis ->
             var entry = zis.nextEntry
             while (entry != null) {
                 if (!entry.isDirectory) {
                     val targetFile = File(memBase, entry.name)
+                    val canonicalTarget = targetFile.canonicalPath
+                    if (!canonicalTarget.startsWith(canonicalBase + File.separator)) {
+                        throw SecurityException("Zip entry attempted path traversal outside memory base: ${entry.name}")
+                    }
                     targetFile.parentFile?.mkdirs()
                     FileOutputStream(targetFile).use { fos ->
                         zis.copyTo(fos)
