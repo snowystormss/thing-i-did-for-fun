@@ -48,17 +48,23 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({ file }) => {
           </div>
 
           <button
+            type="button"
             onClick={handleCopy}
-            className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-md border border-slate-700/80 transition-colors"
+            title={copied ? 'Copied to clipboard!' : `Copy ${file.name} to clipboard`}
+            aria-label={copied ? 'Code copied to clipboard' : `Copy ${file.name} to clipboard`}
+            className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 rounded-md border border-slate-700/80 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
           >
+            <span className="sr-only" aria-live="polite">
+              {copied ? `Copied ${file.name} to clipboard` : ''}
+            </span>
             {copied ? (
               <>
-                <Check className="w-3.5 h-3.5 text-emerald-400" />
+                <Check className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
                 <span className="text-emerald-300">Copied</span>
               </>
             ) : (
               <>
-                <Copy className="w-3.5 h-3.5 text-slate-400" />
+                <Copy className="w-3.5 h-3.5 text-slate-400" aria-hidden="true" />
                 <span>Copy</span>
               </>
             )}
