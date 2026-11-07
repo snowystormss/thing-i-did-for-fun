@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import JSZip from 'jszip';
 import { ANDROID_PROJECT_FILES, AndroidFile } from './data/androidProjectFiles';
-import { GRADLE_WRAPPER_JAR_BASE64 } from './data/gradleWrapperJar';
 import { ProjectTree } from './components/ProjectTree';
 import { CodeViewer } from './components/CodeViewer';
 import { EnginePlayground } from './components/EnginePlayground';
@@ -33,6 +31,16 @@ export default function App() {
   const handleDownloadZip = async () => {
     try {
       setIsExporting(true);
+
+      // PERFORMANCE OPTIMIZATION (Bolt):
+      // Dynamically import JSZip and the large base64 Gradle wrapper binary on demand.
+      // This splits ~175 kB (uncompressed) from the critical initial entry bundle,
+      // reducing initial parse/evaluation time and keeping main chunk under 500 kB.
+      const [{ default: JSZip }, { GRADLE_WRAPPER_JAR_BASE64 }] = await Promise.all([
+        import('jszip'),
+        import('./data/gradleWrapperJar')
+      ]);
+
       const zip = new JSZip();
 
       // Add all project files into the root folder
