@@ -141,8 +141,13 @@ Never sound like an overly polite corporate AI assistant or generic chatbot.
 
     fun writeMemoryFile(tier: MemoryTier, filename: String, content: String) {
         val dir = getTierDir(tier)
-        val cleanName = if (filename.endsWith(".txt")) filename else "$filename.txt"
+        val simpleName = File(filename).name
+        val cleanName = if (simpleName.endsWith(".txt")) simpleName else "$simpleName.txt"
         val file = File(dir, cleanName)
+        val canonicalDir = dir.canonicalPath
+        if (!file.canonicalPath.startsWith(canonicalDir + File.separator)) {
+            throw SecurityException("Invalid target file outside tier directory: $filename")
+        }
         file.writeText(content, Charsets.UTF_8)
         if (tier == MemoryTier.PERM) {
             cachedSystemPrompt = null
@@ -151,7 +156,12 @@ Never sound like an overly polite corporate AI assistant or generic chatbot.
 
     fun deleteMemoryFile(tier: MemoryTier, filename: String): Boolean {
         val dir = getTierDir(tier)
-        val file = File(dir, filename)
+        val simpleName = File(filename).name
+        val file = File(dir, simpleName)
+        val canonicalDir = dir.canonicalPath
+        if (!file.canonicalPath.startsWith(canonicalDir + File.separator)) {
+            throw SecurityException("Invalid target file outside tier directory: $filename")
+        }
         val deleted = file.delete()
         if (tier == MemoryTier.PERM) {
             cachedSystemPrompt = null
@@ -179,13 +189,19 @@ Never sound like an overly polite corporate AI assistant or generic chatbot.
 
     /**
      * Imports a ZIP stream over memory base.
+     * Validates entry destination canonical paths to prevent Zip Slip path traversal.
      */
     fun importMemoryFromZip(inputStream: InputStream) {
+        val canonicalMemBase = memBase.canonicalPath
         ZipInputStream(inputStream).use { zis ->
             var entry = zis.nextEntry
             while (entry != null) {
                 if (!entry.isDirectory) {
                     val targetFile = File(memBase, entry.name)
+                    // Security guard: Ensure target path resolves inside memBase (prevent Zip Slip)
+                    if (!targetFile.canonicalPath.startsWith(canonicalMemBase + File.separator)) {
+                        throw SecurityException("Zip entry is outside of target directory: ${entry.name}")
+                    }
                     targetFile.parentFile?.mkdirs()
                     FileOutputStream(targetFile).use { fos ->
                         zis.copyTo(fos)
