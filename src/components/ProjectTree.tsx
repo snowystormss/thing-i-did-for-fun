@@ -1,19 +1,21 @@
 import React from 'react';
 import { AndroidFile } from '../data/androidProjectFiles';
-import { FileCode, FileText, Settings, Layers, Box, Cpu, HardDrive, Smartphone, Check } from 'lucide-react';
+import { FileCode, FileText, Settings, Layers, Box, Cpu, HardDrive, Smartphone, Check, SearchX } from 'lucide-react';
 
 interface ProjectTreeProps {
   files: AndroidFile[];
   selectedFile: AndroidFile;
   onSelectFile: (file: AndroidFile) => void;
   searchQuery: string;
+  onClearSearch?: () => void;
 }
 
 export const ProjectTree: React.FC<ProjectTreeProps> = ({
   files,
   selectedFile,
   onSelectFile,
-  searchQuery
+  searchQuery,
+  onClearSearch
 }) => {
   const filteredFiles = files.filter(f =>
     f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -67,6 +69,33 @@ export const ProjectTree: React.FC<ProjectTreeProps> = ({
     'config'
   ];
 
+  if (filteredFiles.length === 0) {
+    return (
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex flex-col items-center justify-start pt-8 pb-4 px-4 text-center"
+      >
+        <div className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500 mb-3 shadow-inner">
+          <SearchX className="w-5 h-5 text-purple-400/80" aria-hidden="true" />
+        </div>
+        <p className="text-xs font-medium text-slate-300">No matching files found</p>
+        <p className="text-[11px] text-slate-500 mt-1 max-w-[200px] break-words">
+          No files match &ldquo;{searchQuery}&rdquo;
+        </p>
+        {onClearSearch && (
+          <button
+            type="button"
+            onClick={onClearSearch}
+            className="mt-3 px-3 py-1 text-xs font-medium text-purple-300 bg-purple-950/60 hover:bg-purple-900/60 border border-purple-800/60 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-400 cursor-pointer"
+          >
+            Clear filter
+          </button>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full overflow-y-auto pr-1">
       <div className="space-y-4">
@@ -87,10 +116,12 @@ export const ProjectTree: React.FC<ProjectTreeProps> = ({
                   return (
                     <button
                       key={file.path}
+                      type="button"
+                      aria-selected={isSelected}
                       onClick={() => onSelectFile(file)}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-xs flex items-center gap-2.5 transition-all ${
+                      className={`w-full text-left px-3 py-2 rounded-lg text-xs flex items-center gap-2.5 transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-400 cursor-pointer ${
                         isSelected
-                          ? 'bg-purple-600/20 text-purple-300 border border-purple-500/40 font-medium'
+                          ? 'bg-purple-600/20 text-purple-300 border border-purple-500/40 font-medium shadow-xs'
                           : 'text-slate-300 hover:bg-slate-800/70 hover:text-white border border-transparent'
                       }`}
                     >
