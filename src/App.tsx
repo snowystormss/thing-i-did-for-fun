@@ -276,6 +276,7 @@ The output APK will be generated at \`app/build/outputs/apk/debug/app-debug.apk\
                   selectedFile={selectedFile}
                   onSelectFile={file => setSelectedFile(file)}
                   searchQuery={searchQuery}
+                  onClearSearch={() => setSearchQuery('')}
                 />
               </div>
             </div>
