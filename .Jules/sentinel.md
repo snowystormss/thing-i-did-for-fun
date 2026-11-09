@@ -1,0 +1,6 @@
+# Sentinel's Journal - Critical Security Learnings
+
+## 2026-11-09 - Zip Slip Directory Traversal in Memory Archive Import
+**Vulnerability:** In `FileMemoryRepository.importMemoryFromZip`, ZIP archive entries were unpacked directly into `File(memBase, entry.name)` without canonical path validation. A malicious ZIP containing relative path traversal entries (e.g., `../../shared_prefs/lilly_secure_prefs.xml`) could escape the memory directory and overwrite arbitrary application files, including encrypted credentials or databases. Additionally, file creation methods lacked filename path sanitization.
+**Learning:** Whenever dealing with archive streams (`ZipInputStream`) in Java/Kotlin or file path manipulations from untrusted sources, resolving destination files via `File(baseDir, entry.name)` does not restrict the output inside `baseDir` if the entry name contains traversal sequences like `../`.
+**Prevention:** Always resolve the canonical file (`.canonicalFile`) and strictly enforce that `targetFile.path.startsWith(baseDir.canonicalPath + File.separator)` before creating directories or writing file contents, throwing a `SecurityException` upon violation. Sanitize individual filenames with `File(filename).name` and directory bounds checking.
