@@ -1,19 +1,21 @@
 import React from 'react';
 import { AndroidFile } from '../data/androidProjectFiles';
-import { FileCode, FileText, Settings, Layers, Box, Cpu, HardDrive, Smartphone, Check } from 'lucide-react';
+import { FileCode, Settings, Layers, Box, Cpu, HardDrive, Smartphone, Check, SearchX } from 'lucide-react';
 
 interface ProjectTreeProps {
   files: AndroidFile[];
   selectedFile: AndroidFile;
   onSelectFile: (file: AndroidFile) => void;
   searchQuery: string;
+  onClearSearch?: () => void;
 }
 
 export const ProjectTree: React.FC<ProjectTreeProps> = ({
   files,
   selectedFile,
   onSelectFile,
-  searchQuery
+  searchQuery,
+  onClearSearch
 }) => {
   const filteredFiles = files.filter(f =>
     f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -69,54 +71,75 @@ export const ProjectTree: React.FC<ProjectTreeProps> = ({
 
   return (
     <div className="flex flex-col h-full overflow-y-auto pr-1">
-      <div className="space-y-4">
-        {categories.map(category => {
-          const categoryFiles = filteredFiles.filter(f => f.category === category);
-          if (categoryFiles.length === 0) return null;
+      {filteredFiles.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-10 px-4 text-center rounded-lg border border-dashed border-slate-800 bg-slate-900/30">
+          <SearchX className="w-8 h-8 text-slate-500 mb-2" aria-hidden="true" />
+          <p className="text-xs font-medium text-slate-300">No matching files found</p>
+          <p className="text-[11px] text-slate-500 mt-1 max-w-[200px]">
+            No files match &ldquo;{searchQuery}&rdquo;. Try another query or clear the filter.
+          </p>
+          {onClearSearch && (
+            <button
+              type="button"
+              onClick={onClearSearch}
+              className="mt-3 px-3 py-1.5 text-xs font-medium text-purple-300 bg-purple-950/60 hover:bg-purple-900/60 border border-purple-800/50 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 transition-colors cursor-pointer"
+            >
+              Clear filter
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {categories.map(category => {
+            const categoryFiles = filteredFiles.filter(f => f.category === category);
+            if (categoryFiles.length === 0) return null;
 
-          return (
-            <div key={category} className="space-y-1">
-              <div className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-slate-800/80">
-                {getCategoryIcon(category)}
-                <span>{getCategoryLabel(category)}</span>
-                <span className="ml-auto text-[10px] text-slate-500 font-mono">({categoryFiles.length})</span>
+            return (
+              <div key={category} className="space-y-1">
+                <div className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-slate-800/80">
+                  {getCategoryIcon(category)}
+                  <span>{getCategoryLabel(category)}</span>
+                  <span className="ml-auto text-[10px] text-slate-500 font-mono">({categoryFiles.length})</span>
+                </div>
+                <div className="space-y-0.5 pt-0.5" role="listbox" aria-label={getCategoryLabel(category)}>
+                  {categoryFiles.map(file => {
+                    const isSelected = selectedFile.path === file.path;
+                    return (
+                      <button
+                        key={file.path}
+                        role="option"
+                        aria-selected={isSelected}
+                        onClick={() => onSelectFile(file)}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-xs flex items-center gap-2.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 ${
+                          isSelected
+                            ? 'bg-purple-600/20 text-purple-300 border border-purple-500/40 font-medium'
+                            : 'text-slate-300 hover:bg-slate-800/70 hover:text-white border border-transparent'
+                        }`}
+                      >
+                        <span className="shrink-0" aria-hidden="true">
+                          {file.language === 'kotlin' ? (
+                            <span className="text-[10px] font-mono px-1 py-0.5 rounded bg-purple-950/80 text-purple-300 border border-purple-800/60 font-semibold">KT</span>
+                          ) : file.language === 'xml' ? (
+                            <span className="text-[10px] font-mono px-1 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800/60 font-semibold">XML</span>
+                          ) : file.language === 'toml' ? (
+                            <span className="text-[10px] font-mono px-1 py-0.5 rounded bg-amber-950/80 text-amber-300 border border-amber-800/60 font-semibold">TOML</span>
+                          ) : file.language === 'sh' || file.language === 'bat' ? (
+                            <span className="text-[10px] font-mono px-1 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800/60 font-semibold">SH</span>
+                          ) : (
+                            <span className="text-[10px] font-mono px-1 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold">CFG</span>
+                          )}
+                        </span>
+                        <span className="truncate flex-1 font-mono text-[11px]">{file.name}</span>
+                        {isSelected && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" aria-hidden="true" />}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="space-y-0.5 pt-0.5">
-                {categoryFiles.map(file => {
-                  const isSelected = selectedFile.path === file.path;
-                  return (
-                    <button
-                      key={file.path}
-                      onClick={() => onSelectFile(file)}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-xs flex items-center gap-2.5 transition-all ${
-                        isSelected
-                          ? 'bg-purple-600/20 text-purple-300 border border-purple-500/40 font-medium'
-                          : 'text-slate-300 hover:bg-slate-800/70 hover:text-white border border-transparent'
-                      }`}
-                    >
-                      <span className="shrink-0">
-                        {file.language === 'kotlin' ? (
-                          <span className="text-[10px] font-mono px-1 py-0.5 rounded bg-purple-950/80 text-purple-300 border border-purple-800/60 font-semibold">KT</span>
-                        ) : file.language === 'xml' ? (
-                          <span className="text-[10px] font-mono px-1 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800/60 font-semibold">XML</span>
-                        ) : file.language === 'toml' ? (
-                          <span className="text-[10px] font-mono px-1 py-0.5 rounded bg-amber-950/80 text-amber-300 border border-amber-800/60 font-semibold">TOML</span>
-                        ) : file.language === 'sh' || file.language === 'bat' ? (
-                          <span className="text-[10px] font-mono px-1 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800/60 font-semibold">SH</span>
-                        ) : (
-                          <span className="text-[10px] font-mono px-1 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold">CFG</span>
-                        )}
-                      </span>
-                      <span className="truncate flex-1 font-mono text-[11px]">{file.name}</span>
-                      {isSelected && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
