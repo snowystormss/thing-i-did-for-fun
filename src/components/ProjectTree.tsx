@@ -1,19 +1,21 @@
 import React from 'react';
 import { AndroidFile } from '../data/androidProjectFiles';
-import { FileCode, FileText, Settings, Layers, Box, Cpu, HardDrive, Smartphone, Check } from 'lucide-react';
+import { FileCode, FileText, Settings, Layers, Box, Cpu, HardDrive, Smartphone, Check, SearchX } from 'lucide-react';
 
-interface ProjectTreeProps {
+export interface ProjectTreeProps {
   files: AndroidFile[];
   selectedFile: AndroidFile;
   onSelectFile: (file: AndroidFile) => void;
   searchQuery: string;
+  onClearSearch?: () => void;
 }
 
 export const ProjectTree: React.FC<ProjectTreeProps> = ({
   files,
   selectedFile,
   onSelectFile,
-  searchQuery
+  searchQuery,
+  onClearSearch
 }) => {
   const filteredFiles = files.filter(f =>
     f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -69,6 +71,31 @@ export const ProjectTree: React.FC<ProjectTreeProps> = ({
 
   return (
     <div className="flex flex-col h-full overflow-y-auto pr-1">
+      <div className="sr-only" aria-live="polite">
+        {searchQuery ? `${filteredFiles.length} files found for "${searchQuery}"` : ''}
+      </div>
+
+      {filteredFiles.length === 0 && (
+        <div className="flex flex-col items-center justify-center p-6 text-center py-12">
+          <div className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center mb-3 text-slate-500">
+            <SearchX className="w-5 h-5" aria-hidden="true" />
+          </div>
+          <p className="text-xs font-medium text-slate-300">No matching files</p>
+          <p className="text-[11px] text-slate-500 mt-1 max-w-[200px] truncate">
+            No files matched &ldquo;{searchQuery}&rdquo;
+          </p>
+          {onClearSearch && (
+            <button
+              type="button"
+              onClick={onClearSearch}
+              className="mt-3 px-3 py-1.5 text-xs font-medium text-purple-400 hover:text-purple-300 bg-purple-950/40 hover:bg-purple-900/40 border border-purple-800/50 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-400 cursor-pointer"
+            >
+              Clear filter
+            </button>
+          )}
+        </div>
+      )}
+
       <div className="space-y-4">
         {categories.map(category => {
           const categoryFiles = filteredFiles.filter(f => f.category === category);
